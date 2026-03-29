@@ -3,102 +3,224 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pentatonisk skala</title>
+<title>Gitarrverktyg</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#111111">
+<link rel="apple-touch-icon" href="icon.svg">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #111; color: #ddd; font-family: system-ui, sans-serif; padding: 16px 12px; }
-  .controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
-  select { background: #222; color: #ddd; border: 1px solid #444; border-radius: 6px; padding: 6px 10px; font-size: 13px; cursor: pointer; margin-right: 8px; }
-  button { padding: 6px 14px; border-radius: 20px; border: 1px solid #444; background: transparent; color: #888; font-size: 12px; cursor: pointer; transition: all 0.15s; }
-  button:hover { color: #ddd; border-color: #666; }
-  button.active { background: rgba(240,168,48,0.15); border-color: #f0a830; color: #f0a830; }
-  button.all-active { background: #222; border-color: #555; color: #ddd; }
-  button.mode-active { background: rgba(100,210,130,0.15); border-color: #5c5; color: #5c5; }
-  .sep { width: 1px; height: 20px; background: #333; display: inline-block; margin: 0 2px; }
-  #glabel { font-size: 12px; color: #666; margin-bottom: 8px; min-height: 16px; }
-  svg { display: block; width: 100%; max-width: 580px; }
-  .legend { display: flex; gap: 16px; margin-top: 10px; font-size: 12px; color: #666; align-items: center; }
-  .ld { width: 11px; height: 11px; border-radius: 50%; display: inline-block; margin-right: 4px; vertical-align: middle; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #111; color: #ddd; font-family: system-ui, sans-serif; padding: 20px 16px; }
+
+/* Tab bar */
+.tab-bar { display: flex; border-bottom: 1px solid #2a2a2a; margin-bottom: 20px; gap: 0; align-items: center; }
+.reminder-btn { margin-left: auto; margin-bottom: 1px; background: none; border: 1px solid #2a2a2a; border-radius: 20px; color: #444; font-size: 11px; padding: 4px 11px; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+.reminder-btn:hover { color: #888; border-color: #444; }
+.reminder-btn.on { color: #f0a830; border-color: rgba(240,168,48,0.4); }
+.tab { background: none; border: none; border-bottom: 2px solid transparent; color: #555; padding: 9px 18px; cursor: pointer; font-size: 13px; font-weight: 500; letter-spacing: 0.2px; margin-bottom: -1px; transition: color 0.15s; }
+.tab:hover { color: #aaa; }
+.tab.active { color: #f0a830; border-bottom-color: #f0a830; }
+
+/* Controls */
+.controls { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+select {
+  background: #1a1a1a; color: #ccc; border: 1px solid #333;
+  border-radius: 6px; padding: 6px 10px; font-size: 13px; cursor: pointer;
+  appearance: none; -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23666'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 9px center; padding-right: 26px;
+}
+select:hover { border-color: #555; }
+.btn { padding: 5px 13px; border-radius: 20px; border: 1px solid #333; background: transparent; color: #666; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+.btn:hover { color: #ccc; border-color: #555; }
+.btn.active { background: rgba(240,168,48,0.12); border-color: rgba(240,168,48,0.6); color: #f0a830; }
+.btn.all-active { background: #1e1e1e; border-color: #444; color: #bbb; }
+.btn.mode-act { background: rgba(100,210,130,0.1); border-color: rgba(90,200,110,0.5); color: #5c5; }
+.sep { width: 1px; height: 18px; background: #2a2a2a; display: inline-block; margin: 0 2px; flex-shrink: 0; align-self: center; }
+
+/* Labels */
+#glabel { font-size: 12px; color: #555; margin-bottom: 8px; min-height: 16px; }
+#mlabel { font-size: 13px; color: #888; margin-bottom: 4px; font-weight: 500; min-height: 18px; }
+#mformula { font-size: 12px; color: #555; margin-bottom: 10px; letter-spacing: 0.4px; min-height: 16px; }
+
+/* Fretboard */
+.fretboard { display: block; width: 100%; max-width: 900px; }
+
+/* Legend */
+.legend { display: flex; gap: 14px; margin-top: 8px; font-size: 12px; color: #555; align-items: center; }
+.ld { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 4px; vertical-align: middle; }
 </style>
 </head>
 <body>
-<div class="controls">
-  <select id="key-select">
-    <option value="0">A</option><option value="1">Bb</option><option value="2">B</option>
-    <option value="3">C</option><option value="4">C#</option><option value="5">D</option>
-    <option value="6">Eb</option><option value="7">E</option><option value="8">F</option>
-    <option value="9">F#</option><option value="10">G</option><option value="11">G#</option>
-  </select>
-  <button id="btn-moll" class="mode-active" onclick="selectMode('moll')">Moll</button>
-  <button id="btn-dur" onclick="selectMode('dur')">Dur</button>
-  <span class="sep"></span>
-  <button id="btn-all" class="all-active" onclick="selectG('all')">Alla</button>
-  <button id="btn-1" class="active" onclick="selectG(1)">Grepp 1</button>
-  <button id="btn-2" onclick="selectG(2)">Grepp 2</button>
-  <button id="btn-3" onclick="selectG(3)">Grepp 3</button>
-  <button id="btn-4" onclick="selectG(4)">Grepp 4</button>
-  <button id="btn-5" onclick="selectG(5)">Grepp 5</button>
+
+<div class="tab-bar">
+  <button class="tab active" id="tab-penta" onclick="switchTab('penta')">Pentatonisk</button>
+  <button class="tab" id="tab-modal" onclick="switchTab('modal')">Modal</button>
+  <button class="reminder-btn" id="reminder-btn" onclick="toggleReminder()">🔔 16:00</button>
 </div>
-<div id="glabel"></div>
-<svg viewBox="0 0 680 215">
-  <line x1="60" y1="12" x2="60" y2="190" stroke="rgba(255,255,255,0.5)" stroke-width="3.5"/>
-  <line x1="104" y1="12" x2="104" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
-  <line x1="148" y1="12" x2="148" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
-  <line x1="192" y1="12" x2="192" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
-  <line x1="236" y1="12" x2="236" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
-  <line x1="280" y1="12" x2="280" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
-  <line x1="324" y1="12" x2="324" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
-  <line x1="368" y1="12" x2="368" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
-  <line x1="412" y1="12" x2="412" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
-  <line x1="456" y1="12" x2="456" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
-  <line x1="500" y1="12" x2="500" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
-  <line x1="544" y1="12" x2="544" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
-  <line x1="588" y1="12" x2="588" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
-  <line x1="632" y1="12" x2="632" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
-  <line x1="36" y1="22"  x2="670" y2="22"  stroke="rgba(255,255,255,0.25)" stroke-width="0.8"/>
-  <line x1="36" y1="54"  x2="670" y2="54"  stroke="rgba(255,255,255,0.28)" stroke-width="1.1"/>
-  <line x1="36" y1="86"  x2="670" y2="86"  stroke="rgba(255,255,255,0.32)" stroke-width="1.4"/>
-  <line x1="36" y1="118" x2="670" y2="118" stroke="rgba(255,255,255,0.36)" stroke-width="1.8"/>
-  <line x1="36" y1="150" x2="670" y2="150" stroke="rgba(255,255,255,0.40)" stroke-width="2.1"/>
-  <line x1="36" y1="178" x2="670" y2="178" stroke="rgba(255,255,255,0.45)" stroke-width="2.4"/>
-  <text x="46" y="22"  text-anchor="middle" dominant-baseline="central" font-size="11" fill="rgba(255,255,255,0.3)">e</text>
-  <text x="46" y="54"  text-anchor="middle" dominant-baseline="central" font-size="11" fill="rgba(255,255,255,0.3)">B</text>
-  <text x="46" y="86"  text-anchor="middle" dominant-baseline="central" font-size="11" fill="rgba(255,255,255,0.3)">G</text>
-  <text x="46" y="118" text-anchor="middle" dominant-baseline="central" font-size="11" fill="rgba(255,255,255,0.3)">D</text>
-  <text x="46" y="150" text-anchor="middle" dominant-baseline="central" font-size="11" fill="rgba(255,255,255,0.3)">A</text>
-  <text x="46" y="178" text-anchor="middle" dominant-baseline="central" font-size="11" fill="rgba(255,255,255,0.3)">E</text>
-  <text x="82"  y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">1</text>
-  <text x="126" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">2</text>
-  <text x="170" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">3</text>
-  <text x="214" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">4</text>
-  <text x="258" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">5</text>
-  <text x="302" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">6</text>
-  <text x="346" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">7</text>
-  <text x="390" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">8</text>
-  <text x="434" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">9</text>
-  <text x="478" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">10</text>
-  <text x="522" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">11</text>
-  <text x="566" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">12</text>
-  <text x="610" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">13</text>
-  <text x="654" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">14</text>
-  <g id="dots"></g>
-</svg>
-<div class="legend">
-  <span><span class="ld" style="background:#f0a830"></span>Rotnot (R)</span>
-  <span><span class="ld" style="background:#4a90d9"></span>Övriga toner</span>
+
+<!-- ═══ PENTATONISK ═══ -->
+<div id="panel-penta">
+  <div class="controls">
+    <select id="p-key">
+      <option value="0">A</option><option value="1">Bb</option><option value="2">B</option>
+      <option value="3">C</option><option value="4">C#</option><option value="5">D</option>
+      <option value="6">Eb</option><option value="7">E</option><option value="8">F</option>
+      <option value="9">F#</option><option value="10">G</option><option value="11">G#</option>
+    </select>
+    <select id="p-mode">
+      <option value="moll">Moll</option>
+      <option value="dur">Dur</option>
+    </select>
+  </div>
+  <div class="controls" style="margin-top:2px">
+    <button id="btn-all" class="btn all-active" onclick="selectG('all')">Alla</button>
+    <span class="sep"></span>
+    <button id="btn-1"   class="btn active" onclick="selectG(1)">Grepp 1</button>
+    <button id="btn-2"   class="btn"        onclick="selectG(2)">Grepp 2</button>
+    <button id="btn-3"   class="btn"        onclick="selectG(3)">Grepp 3</button>
+    <button id="btn-4"   class="btn"        onclick="selectG(4)">Grepp 4</button>
+    <button id="btn-5"   class="btn"        onclick="selectG(5)">Grepp 5</button>
+  </div>
+  <div id="glabel"></div>
+  <svg class="fretboard" viewBox="0 0 680 215">
+    <line x1="60" y1="12" x2="60" y2="190" stroke="rgba(255,255,255,0.5)" stroke-width="3.5"/>
+    <line x1="104" y1="12" x2="104" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="148" y1="12" x2="148" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="192" y1="12" x2="192" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="236" y1="12" x2="236" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="280" y1="12" x2="280" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="324" y1="12" x2="324" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="368" y1="12" x2="368" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="412" y1="12" x2="412" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="456" y1="12" x2="456" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="500" y1="12" x2="500" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="544" y1="12" x2="544" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="588" y1="12" x2="588" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="632" y1="12" x2="632" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="36" y1="22"  x2="670" y2="22"  stroke="rgba(255,255,255,0.25)" stroke-width="0.8"/>
+    <line x1="36" y1="54"  x2="670" y2="54"  stroke="rgba(255,255,255,0.28)" stroke-width="1.1"/>
+    <line x1="36" y1="86"  x2="670" y2="86"  stroke="rgba(255,255,255,0.32)" stroke-width="1.4"/>
+    <line x1="36" y1="118" x2="670" y2="118" stroke="rgba(255,255,255,0.36)" stroke-width="1.8"/>
+    <line x1="36" y1="150" x2="670" y2="150" stroke="rgba(255,255,255,0.40)" stroke-width="2.1"/>
+    <line x1="36" y1="178" x2="670" y2="178" stroke="rgba(255,255,255,0.45)" stroke-width="2.4"/>
+    <text x="46" y="22"  text-anchor="middle" dominant-baseline="central" font-size="11" fill="rgba(255,255,255,0.3)">e</text>
+    <text x="46" y="54"  text-anchor="middle" dominant-baseline="central" font-size="11" fill="rgba(255,255,255,0.3)">B</text>
+    <text x="46" y="86"  text-anchor="middle" dominant-baseline="central" font-size="11" fill="rgba(255,255,255,0.3)">G</text>
+    <text x="46" y="118" text-anchor="middle" dominant-baseline="central" font-size="11" fill="rgba(255,255,255,0.3)">D</text>
+    <text x="46" y="150" text-anchor="middle" dominant-baseline="central" font-size="11" fill="rgba(255,255,255,0.3)">A</text>
+    <text x="46" y="178" text-anchor="middle" dominant-baseline="central" font-size="11" fill="rgba(255,255,255,0.3)">E</text>
+    <text x="82"  y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">1</text>
+    <text x="126" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">2</text>
+    <text x="170" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">3</text>
+    <text x="214" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">4</text>
+    <text x="258" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">5</text>
+    <text x="302" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">6</text>
+    <text x="346" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">7</text>
+    <text x="390" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">8</text>
+    <text x="434" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">9</text>
+    <text x="478" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">10</text>
+    <text x="522" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">11</text>
+    <text x="566" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">12</text>
+    <text x="610" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">13</text>
+    <text x="654" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">14</text>
+    <g id="dots"></g>
+  </svg>
+  <div class="legend">
+    <span><span class="ld" style="background:#f0a830"></span>Rotnot (R)</span>
+    <span><span class="ld" style="background:#4a90d9"></span>Övriga toner</span>
+  </div>
 </div>
+
+<!-- ═══ MODAL ═══ -->
+<div id="panel-modal" style="display:none">
+  <div class="controls">
+    <select id="m-key">
+      <option value="0">A</option><option value="1">Bb</option><option value="2">B</option>
+      <option value="3">C</option><option value="4">C#</option><option value="5">D</option>
+      <option value="6">Eb</option><option value="7">E</option><option value="8">F</option>
+      <option value="9">F#</option><option value="10">G</option><option value="11">G#</option>
+    </select>
+    <select id="m-mode">
+      <option value="jonisk">Jonisk (dur)</option>
+      <option value="dorisk" selected>Dorisk</option>
+      <option value="frygisk">Frygisk</option>
+      <option value="lydisk">Lydisk</option>
+      <option value="mixolydisk">Mixolydisk</option>
+      <option value="eolisk">Eolisk (moll)</option>
+      <option value="lokrisk">Lokrisk</option>
+    </select>
+  </div>
+  <div id="modal-grepp-row" class="controls" style="margin-top:2px"></div>
+  <div id="mlabel"></div>
+  <div id="mformula"></div>
+  <svg class="fretboard" viewBox="0 0 660 220">
+    <!-- Nut -->
+    <line x1="60" y1="12" x2="60" y2="190" stroke="rgba(255,255,255,0.5)" stroke-width="3.5"/>
+    <!-- Fret lines — x = 60 + n*48, n=1..12 -->
+    <line x1="108" y1="12" x2="108" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="156" y1="12" x2="156" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="204" y1="12" x2="204" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="252" y1="12" x2="252" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="300" y1="12" x2="300" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="348" y1="12" x2="348" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="396" y1="12" x2="396" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="444" y1="12" x2="444" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="492" y1="12" x2="492" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="540" y1="12" x2="540" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="588" y1="12" x2="588" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="636" y1="12" x2="636" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <!-- Strings -->
+    <line x1="36" y1="22"  x2="650" y2="22"  stroke="rgba(255,255,255,0.25)" stroke-width="0.8"/>
+    <line x1="36" y1="54"  x2="650" y2="54"  stroke="rgba(255,255,255,0.28)" stroke-width="1.1"/>
+    <line x1="36" y1="86"  x2="650" y2="86"  stroke="rgba(255,255,255,0.32)" stroke-width="1.4"/>
+    <line x1="36" y1="118" x2="650" y2="118" stroke="rgba(255,255,255,0.36)" stroke-width="1.8"/>
+    <line x1="36" y1="150" x2="650" y2="150" stroke="rgba(255,255,255,0.40)" stroke-width="2.1"/>
+    <line x1="36" y1="178" x2="650" y2="178" stroke="rgba(255,255,255,0.45)" stroke-width="2.4"/>
+    <!-- Position markers (frets 3,5,7,9,12) -->
+    <circle cx="180" cy="102" r="4" fill="rgba(255,255,255,0.07)"/>
+    <circle cx="276" cy="102" r="4" fill="rgba(255,255,255,0.07)"/>
+    <circle cx="372" cy="102" r="4" fill="rgba(255,255,255,0.07)"/>
+    <circle cx="468" cy="102" r="4" fill="rgba(255,255,255,0.07)"/>
+    <circle cx="612" cy="70"  r="4" fill="rgba(255,255,255,0.07)"/>
+    <circle cx="612" cy="134" r="4" fill="rgba(255,255,255,0.07)"/>
+    <!-- String labels -->
+    <text x="46" y="22"  text-anchor="middle" dominant-baseline="central" font-size="11" fill="rgba(255,255,255,0.3)">e</text>
+    <text x="46" y="54"  text-anchor="middle" dominant-baseline="central" font-size="11" fill="rgba(255,255,255,0.3)">B</text>
+    <text x="46" y="86"  text-anchor="middle" dominant-baseline="central" font-size="11" fill="rgba(255,255,255,0.3)">G</text>
+    <text x="46" y="118" text-anchor="middle" dominant-baseline="central" font-size="11" fill="rgba(255,255,255,0.3)">D</text>
+    <text x="46" y="150" text-anchor="middle" dominant-baseline="central" font-size="11" fill="rgba(255,255,255,0.3)">A</text>
+    <text x="46" y="178" text-anchor="middle" dominant-baseline="central" font-size="11" fill="rgba(255,255,255,0.3)">E</text>
+    <!-- Fret numbers -->
+    <text x="84"  y="210" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">1</text>
+    <text x="132" y="210" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">2</text>
+    <text x="180" y="210" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">3</text>
+    <text x="228" y="210" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">4</text>
+    <text x="276" y="210" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">5</text>
+    <text x="324" y="210" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">6</text>
+    <text x="372" y="210" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">7</text>
+    <text x="420" y="210" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">8</text>
+    <text x="468" y="210" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">9</text>
+    <text x="516" y="210" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">10</text>
+    <text x="564" y="210" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">11</text>
+    <text x="612" y="210" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">12</text>
+    <g id="modal-dots"></g>
+  </svg>
+  <div class="legend">
+    <span><span class="ld" style="background:#f0a830"></span>Rotnot (R)</span>
+    <span><span class="ld" style="background:#4a90d9"></span>Skalton</span>
+  </div>
+</div>
+
 <script>
-function bx(n){return 60+(n-0.5)*44;}
-var sy=[22,54,86,118,150,178];
-var keyToRootFret=[5,6,7,8,9,10,11,12,1,2,3,4];
+var ns='http://www.w3.org/2000/svg';
 var keyNames=['A','Bb','B','C','C#','D','Eb','E','F','F#','G','G#'];
-var greppDefs=[
-  [[5,0,'R'],[5,3,'m3'],[4,0,'R'],[4,2,'4'],[3,0,'5'],[3,2,'m7'],[2,0,'m7'],[2,2,'R'],[1,0,'m3'],[1,3,'4'],[0,0,'R'],[0,3,'m3']],
-  [[5,3,'m3'],[5,6,'4'],[4,3,'4'],[4,6,'R'],[3,3,'R'],[3,5,'m3'],[2,3,'m3'],[2,5,'4'],[1,4,'4'],[1,6,'R'],[0,3,'m3'],[0,6,'4']],
-  [[5,6,'4'],[5,8,'R'],[4,6,'R'],[4,8,'m3'],[3,5,'m3'],[3,8,'4'],[2,5,'m3'],[2,7,'4'],[1,6,'R'],[1,8,'m3'],[0,6,'4'],[0,8,'R']],
-  [[5,8,'5'],[5,10,'m7'],[4,8,'m7'],[4,10,'R'],[3,8,'4'],[3,10,'5'],[2,8,'m3'],[2,9,'4'],[1,9,'m3'],[1,10,'4'],[0,8,'5'],[0,10,'m7']],
-  [[5,10,'m7'],[4,10,'4'],[4,11,'5'],[3,10,'m3'],[3,12,'4'],[2,9,'m7'],[2,11,'R'],[1,10,'5'],[1,12,'m7'],[0,10,'m7'],[0,12,'R']]
-];
+var chromatic=['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
+var rootSemitones=[9,10,11,0,1,2,3,4,5,6,7,8];
+var sy=[22,54,86,118,150,178];
+
+// ── Pentatonisk ────────────────────────────────────────────────
+var bxP=function(n){return 60+(n-0.5)*44;};
+var keyToRootFret=[5,6,7,8,9,10,11,12,1,2,3,4];
 var greppDefs={
   moll:[
     [[5,0,'R'],[5,3,'m3'],[4,0,'R'],[4,2,'4'],[3,0,'5'],[3,2,'m7'],[2,0,'m7'],[2,2,'R'],[1,0,'m3'],[1,3,'4'],[0,0,'R'],[0,3,'m3']],
@@ -117,58 +239,268 @@ var greppDefs={
 };
 var greppLabels={
   moll:{1:'Grepp 1 — rotnoten på E- och A-strängen',2:'Grepp 2 — börjar på m3',3:'Grepp 3 — börjar på kvart (4)',4:'Grepp 4 — börjar på kvint (5)',5:'Grepp 5 — börjar på m7',all:'Alla grepp'},
-  dur:{1:'Grepp 1 — rotnoten på E-strängarna',2:'Grepp 2 — börjar på 2an',3:'Grepp 3 — börjar på ters (3)',4:'Grepp 4 — börjar på kvint (5)',5:'Grepp 5 — börjar på sext (6)',all:'Alla grepp'}
+  dur: {1:'Grepp 1 — rotnoten på E-strängarna',2:'Grepp 2 — börjar på 2an',3:'Grepp 3 — börjar på ters (3)',4:'Grepp 4 — börjar på kvint (5)',5:'Grepp 5 — börjar på sext (6)',all:'Alla grepp'}
 };
-var curGrepp=1,curKey=0,curMode='moll',ns='http://www.w3.org/2000/svg';
+var curGrepp=1, curKey=0, curPentaMode='moll';
+
 function render(){
   var c=document.getElementById('dots');
   while(c.firstChild)c.removeChild(c.firstChild);
   var rf=keyToRootFret[curKey];
-  greppDefs[curMode].forEach(function(gdef,gi){
-    var n=gi+1,w=document.createElementNS(ns,'g');
+  greppDefs[curPentaMode].forEach(function(gdef,gi){
+    var n=gi+1, w=document.createElementNS(ns,'g');
     w.id='dg'+n;
     w.style.opacity=(curGrepp==='all'||curGrepp===n)?'1':'0.06';
     w.style.transition='opacity 0.2s';
     gdef.forEach(function(nd){
       var f=rf+nd[1];
-      while(f>14)f-=12;while(f<1)f+=12;
+      while(f>14)f-=12; while(f<1)f+=12;
       if(f<1||f>14)return;
       var g=document.createElementNS(ns,'g');
       var ci=document.createElementNS(ns,'circle');
-      ci.setAttribute('cx',bx(f));ci.setAttribute('cy',sy[nd[0]]);ci.setAttribute('r','11');
+      ci.setAttribute('cx',bxP(f)); ci.setAttribute('cy',sy[nd[0]]); ci.setAttribute('r','11');
       ci.setAttribute('fill',nd[2]==='R'?'#f0a830':'#4a90d9');
       var t=document.createElementNS(ns,'text');
-      t.setAttribute('x',bx(f));t.setAttribute('y',sy[nd[0]]);
-      t.setAttribute('text-anchor','middle');t.setAttribute('dominant-baseline','central');
-      t.setAttribute('font-size','9');t.setAttribute('font-weight','500');
+      t.setAttribute('x',bxP(f)); t.setAttribute('y',sy[nd[0]]);
+      t.setAttribute('text-anchor','middle'); t.setAttribute('dominant-baseline','central');
+      t.setAttribute('font-size','9'); t.setAttribute('font-weight','500');
       t.setAttribute('fill',nd[2]==='R'?'#2a1800':'#e8f4ff');
       t.textContent=nd[2];
-      g.appendChild(ci);g.appendChild(t);w.appendChild(g);
+      g.appendChild(ci); g.appendChild(t); w.appendChild(g);
     });
     c.appendChild(w);
   });
-  document.getElementById('glabel').textContent=keyNames[curKey]+' '+(curMode==='moll'?'moll':'dur')+'-pentatonisk — '+greppLabels[curMode][curGrepp];
+  document.getElementById('glabel').textContent=
+    keyNames[curKey]+' '+(curPentaMode==='moll'?'moll':'dur')+'-pentatonisk — '+greppLabels[curPentaMode][curGrepp];
 }
-function selectMode(m){
-  curMode=m;
-  document.getElementById('btn-moll').className=m==='moll'?'mode-active':'';
-  document.getElementById('btn-dur').className=m==='dur'?'mode-active':'';
-  render();selectG(curGrepp);
-}
+
 function selectG(g){
   curGrepp=g;
   ['all',1,2,3,4,5].forEach(function(k){
     var b=document.getElementById('btn-'+k);
-    if(b)b.className=k===g?(g==='all'?'all-active':'active'):'';
+    if(b)b.className='btn'+(k===g?(g==='all'?' all-active':' active'):'');
   });
   document.querySelectorAll('[id^="dg"]').forEach(function(el){
     var n=parseInt(el.id.replace('dg',''));
     el.style.opacity=(g==='all'||g===n)?'1':'0.06';
   });
-  document.getElementById('glabel').textContent=keyNames[curKey]+' '+(curMode==='moll'?'moll':'dur')+'-pentatonisk — '+greppLabels[curMode][g];
+  document.getElementById('glabel').textContent=
+    keyNames[curKey]+' '+(curPentaMode==='moll'?'moll':'dur')+'-pentatonisk — '+greppLabels[curPentaMode][g];
 }
-document.getElementById('key-select').addEventListener('change',function(){curKey=parseInt(this.value);render();selectG(curGrepp);});
-render();selectG(1);
+
+document.getElementById('p-key').addEventListener('change',function(){
+  curKey=parseInt(this.value); render(); selectG(curGrepp);
+});
+document.getElementById('p-mode').addEventListener('change',function(){
+  curPentaMode=this.value; render(); selectG(curGrepp);
+});
+
+// ── Modal ──────────────────────────────────────────────────────
+var bxM=function(n){return 60+(n-0.5)*48;};
+var openNotes=[4,11,7,2,9,4]; // strings: 0=e 1=B 2=G 3=D 4=A 5=E
+
+var modes={
+  jonisk:    {label:'Jonisk (dur)',   ivs:[0,2,4,5,7,9,11], lbl:{0:'R',2:'2',4:'3',5:'4',7:'5',9:'6',11:'7'}},
+  dorisk:    {label:'Dorisk',        ivs:[0,2,3,5,7,9,10], lbl:{0:'R',2:'2',3:'m3',5:'4',7:'5',9:'6',10:'m7'}},
+  frygisk:   {label:'Frygisk',       ivs:[0,1,3,5,7,8,10], lbl:{0:'R',1:'b2',3:'m3',5:'4',7:'5',8:'b6',10:'m7'}},
+  lydisk:    {label:'Lydisk',        ivs:[0,2,4,6,7,9,11], lbl:{0:'R',2:'2',4:'3',6:'#4',7:'5',9:'6',11:'7'}},
+  mixolydisk:{label:'Mixolydisk',    ivs:[0,2,4,5,7,9,10], lbl:{0:'R',2:'2',4:'3',5:'4',7:'5',9:'6',10:'m7'}},
+  eolisk:    {label:'Eolisk (moll)', ivs:[0,2,3,5,7,8,10], lbl:{0:'R',2:'2',3:'m3',5:'4',7:'5',8:'b6',10:'m7'}},
+  lokrisk:   {label:'Lokrisk',       ivs:[0,1,3,5,6,8,10], lbl:{0:'R',1:'b2',3:'m3',5:'4',6:'b5',8:'b6',10:'m7'}}
+};
+var curModalKey=0, curModalMode='dorisk', curModalGrepp='all';
+
+// Räkna ut de 7 positionernas startband (baserat på skaltonerna på low-E-strängen)
+function getModalPositions(){
+  var rs=rootSemitones[curModalKey];
+  var mode=modes[curModalMode];
+  var iSet={};
+  mode.ivs.forEach(function(iv){iSet[iv]=mode.lbl[iv];});
+  var lowE=openNotes[5]; // E=4
+  var pos=[];
+  for(var f=1;f<=12;f++){
+    var note=(lowE+f)%12;
+    var iv=(note-rs+12)%12;
+    if(iSet[iv]!==undefined) pos.push({fret:f, label:iSet[iv]});
+  }
+  return pos; // alltid 7 element för en 7-tonsskala
+}
+
+function buildModalGreppButtons(){
+  var row=document.getElementById('modal-grepp-row');
+  row.innerHTML='';
+  var positions=getModalPositions();
+
+  function mkBtn(txt, g, cls){
+    var b=document.createElement('button');
+    b.className='btn'+(cls?' '+cls:'');
+    b.textContent=txt;
+    b.onclick=function(){selectModalG(g);};
+    row.appendChild(b);
+  }
+
+  mkBtn('Alla','all',curModalGrepp==='all'?'all-active':'');
+  var sep=document.createElement('span'); sep.className='sep'; row.appendChild(sep);
+  positions.forEach(function(p,i){
+    mkBtn(p.label, i+1, curModalGrepp===i+1?'active':'');
+  });
+}
+
+function renderModal(){
+  var c=document.getElementById('modal-dots');
+  while(c.firstChild)c.removeChild(c.firstChild);
+  var rs=rootSemitones[curModalKey];
+  var mode=modes[curModalMode];
+  var iSet={};
+  mode.ivs.forEach(function(iv){iSet[iv]=mode.lbl[iv];});
+
+  // Beräkna fönster för valt grepp
+  var winStart=null, winEnd=null;
+  if(curModalGrepp!=='all'){
+    var positions=getModalPositions();
+    var p=positions[curModalGrepp-1];
+    if(p){ winStart=p.fret; winEnd=p.fret+4; }
+  }
+
+  function inWindow(f){
+    if(winStart===null) return true;
+    if(f>=winStart && f<=winEnd) return true;
+    // hantera wrap förbi band 12
+    if(winEnd>12 && f<=winEnd-12) return true;
+    return false;
+  }
+
+  for(var s=0;s<6;s++){
+    for(var f=1;f<=12;f++){
+      if(!inWindow(f)) continue;
+      var note=(openNotes[s]+f)%12;
+      var iv=(note-rs+12)%12;
+      if(iSet[iv]===undefined) continue;
+      var lbl=iSet[iv];
+      var g=document.createElementNS(ns,'g');
+      var ci=document.createElementNS(ns,'circle');
+      ci.setAttribute('cx',bxM(f)); ci.setAttribute('cy',sy[s]); ci.setAttribute('r','10');
+      ci.setAttribute('fill',lbl==='R'?'#f0a830':'rgba(74,144,217,0.82)');
+      var t=document.createElementNS(ns,'text');
+      t.setAttribute('x',bxM(f)); t.setAttribute('y',sy[s]);
+      t.setAttribute('text-anchor','middle'); t.setAttribute('dominant-baseline','central');
+      t.setAttribute('font-size','8'); t.setAttribute('font-weight','500');
+      t.setAttribute('fill',lbl==='R'?'#2a1800':'#e8f4ff');
+      t.textContent=lbl;
+      g.appendChild(ci); g.appendChild(t); c.appendChild(g);
+    }
+  }
+
+  buildModalGreppButtons();
+  var noteNames=mode.ivs.map(function(iv){return chromatic[(rs+iv)%12];});
+  document.getElementById('mlabel').textContent=keyNames[curModalKey]+' '+mode.label;
+  document.getElementById('mformula').textContent=noteNames.join('  —  ');
+}
+
+function selectModalG(g){
+  curModalGrepp=g;
+  renderModal();
+}
+
+document.getElementById('m-key').addEventListener('change',function(){
+  curModalKey=parseInt(this.value); curModalGrepp='all'; renderModal();
+});
+document.getElementById('m-mode').addEventListener('change',function(){
+  curModalMode=this.value; curModalGrepp='all'; renderModal();
+});
+
+// ── Tabbar ─────────────────────────────────────────────────────
+function switchTab(t){
+  document.getElementById('panel-penta').style.display=t==='penta'?'':'none';
+  document.getElementById('panel-modal').style.display=t==='modal'?'':'none';
+  document.getElementById('tab-penta').className='tab'+(t==='penta'?' active':'');
+  document.getElementById('tab-modal').className='tab'+(t==='modal'?' active':'');
+}
+
+// ── Init ───────────────────────────────────────────────────────
+render(); selectG(1);
+renderModal();
+
+// ── PWA & Påminnelse ───────────────────────────────────────────
+var swReg = null;
+var reminderTimer = null;
+var REMINDER_KEY = 'guitarReminder';
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').then(function(reg) {
+    swReg = reg;
+  });
+}
+
+function updateReminderBtn() {
+  var on = localStorage.getItem(REMINDER_KEY) === '1';
+  var btn = document.getElementById('reminder-btn');
+  btn.className = 'reminder-btn' + (on ? ' on' : '');
+  btn.title = on ? 'Påminnelse aktiv — klicka för att stänga av' : 'Aktivera daglig påminnelse kl 15:00';
+}
+
+function scheduleNextReminder() {
+  if (reminderTimer) clearTimeout(reminderTimer);
+  var now = new Date();
+  var next = new Date();
+  next.setHours(16, 0, 0, 0);
+  if (now >= next) next.setDate(next.getDate() + 1);
+  var ms = next - now;
+  reminderTimer = setTimeout(function() {
+    fireReminder();
+    // Schemalägg nästa dag
+    setTimeout(function() {
+      if (localStorage.getItem(REMINDER_KEY) === '1') scheduleNextReminder();
+    }, 2000);
+  }, ms);
+}
+
+function fireReminder() {
+  if (swReg && swReg.active) {
+    swReg.active.postMessage({ type: 'GUITAR_REMINDER' });
+  } else if (Notification.permission === 'granted') {
+    new Notification('Dags att öva gitarr! 🎸', {
+      body: 'Öppna appen och kör igenom ett par grepp.',
+      icon: './icon.svg'
+    });
+  }
+}
+
+function toggleReminder() {
+  var on = localStorage.getItem(REMINDER_KEY) === '1';
+  if (on) {
+    localStorage.setItem(REMINDER_KEY, '0');
+    if (reminderTimer) clearTimeout(reminderTimer);
+    reminderTimer = null;
+    updateReminderBtn();
+    return;
+  }
+  if (!('Notification' in window)) {
+    alert('Din webbläsare stöder inte notiser.');
+    return;
+  }
+  Notification.requestPermission().then(function(perm) {
+    if (perm === 'granted') {
+      localStorage.setItem(REMINDER_KEY, '1');
+      scheduleNextReminder();
+      updateReminderBtn();
+    } else {
+      alert('Tillstånd för notiser nekades. Aktivera det i webbläsarens inställningar.');
+    }
+  });
+}
+
+// Starta automatiskt om det var aktiverat senast
+updateReminderBtn();
+if (localStorage.getItem(REMINDER_KEY) === '1' && 'Notification' in window) {
+  if (Notification.permission === 'granted') {
+    scheduleNextReminder();
+  } else {
+    // Tillstånd har dragits tillbaka, rensa
+    localStorage.setItem(REMINDER_KEY, '0');
+    updateReminderBtn();
+  }
+}
 </script>
 </body>
 </html>
