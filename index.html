@@ -7,13 +7,15 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#111111">
 <link rel="apple-touch-icon" href="icon.svg">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #111; color: #ddd; font-family: system-ui, sans-serif; padding: 20px 16px; }
 
 /* Tab bar */
 .tab-bar { display: flex; border-bottom: 1px solid #2a2a2a; margin-bottom: 20px; gap: 0; align-items: center; }
-.reminder-btn { margin-left: auto; margin-bottom: 1px; background: none; border: 1px solid #2a2a2a; border-radius: 20px; color: #444; font-size: 11px; padding: 4px 11px; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+.email-reminder { margin-left: auto; display: flex; align-items: center; gap: 6px; margin-bottom: 1px; }
+.reminder-btn { background: none; border: 1px solid #2a2a2a; border-radius: 20px; color: #444; font-size: 11px; padding: 4px 11px; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
 .reminder-btn:hover { color: #888; border-color: #444; }
 .reminder-btn.on { color: #f0a830; border-color: rgba(240,168,48,0.4); }
 .tab { background: none; border: none; border-bottom: 2px solid transparent; color: #555; padding: 9px 18px; cursor: pointer; font-size: 13px; font-weight: 500; letter-spacing: 0.2px; margin-bottom: -1px; transition: color 0.15s; }
@@ -55,7 +57,9 @@ select:hover { border-color: #555; }
 <div class="tab-bar">
   <button class="tab active" id="tab-penta" onclick="switchTab('penta')">Pentatonisk</button>
   <button class="tab" id="tab-modal" onclick="switchTab('modal')">Modal</button>
-  <button class="reminder-btn" id="reminder-btn" onclick="toggleReminder()">🔔 16:00</button>
+  <div class="email-reminder">
+    <button class="reminder-btn" id="reminder-btn" onclick="toggleEmailReminder()">📧 Påminn 16:30</button>
+  </div>
 </div>
 
 <!-- ═══ PENTATONISK ═══ -->
@@ -421,86 +425,61 @@ function switchTab(t){
 render(); selectG(1);
 renderModal();
 
-// ── PWA & Påminnelse ───────────────────────────────────────────
-var swReg = null;
-var reminderTimer = null;
-var REMINDER_KEY = 'guitarReminder';
+// ── PWA service worker ─────────────────────────────────────────
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
 
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').then(function(reg) {
-    swReg = reg;
-  });
-}
+// ── EmailJS påminnelse ─────────────────────────────────────────
+emailjs.init('fX5GM88LRQwx-BYPX');
+
+var emailTimer = null;
+var EMAIL_KEY  = 'guitarEmailReminder';
 
 function updateReminderBtn() {
-  var on = localStorage.getItem(REMINDER_KEY) === '1';
+  var on  = localStorage.getItem(EMAIL_KEY) === '1';
   var btn = document.getElementById('reminder-btn');
   btn.className = 'reminder-btn' + (on ? ' on' : '');
-  btn.title = on ? 'Påminnelse aktiv — klicka för att stänga av' : 'Aktivera daglig påminnelse kl 15:00';
+  btn.textContent = on ? '📧 Aktiv 16:30' : '📧 Påminn 16:30';
 }
 
-function scheduleNextReminder() {
-  if (reminderTimer) clearTimeout(reminderTimer);
-  var now = new Date();
+function scheduleEmail() {
+  if (emailTimer) clearTimeout(emailTimer);
+  var now  = new Date();
   var next = new Date();
-  next.setHours(16, 0, 0, 0);
+  next.setHours(16, 30, 0, 0);
   if (now >= next) next.setDate(next.getDate() + 1);
   var ms = next - now;
-  reminderTimer = setTimeout(function() {
-    fireReminder();
-    // Schemalägg nästa dag
+  emailTimer = setTimeout(function() {
+    sendReminderEmail();
     setTimeout(function() {
-      if (localStorage.getItem(REMINDER_KEY) === '1') scheduleNextReminder();
+      if (localStorage.getItem(EMAIL_KEY) === '1') scheduleEmail();
     }, 2000);
   }, ms);
 }
 
-function fireReminder() {
-  if (swReg && swReg.active) {
-    swReg.active.postMessage({ type: 'GUITAR_REMINDER' });
-  } else if (Notification.permission === 'granted') {
-    new Notification('Dags att öva gitarr! 🎸', {
-      body: 'Öppna appen och kör igenom ett par grepp.',
-      icon: './icon.svg'
-    });
-  }
-}
-
-function toggleReminder() {
-  var on = localStorage.getItem(REMINDER_KEY) === '1';
-  if (on) {
-    localStorage.setItem(REMINDER_KEY, '0');
-    if (reminderTimer) clearTimeout(reminderTimer);
-    reminderTimer = null;
-    updateReminderBtn();
-    return;
-  }
-  if (!('Notification' in window)) {
-    alert('Din webbläsare stöder inte notiser.');
-    return;
-  }
-  Notification.requestPermission().then(function(perm) {
-    if (perm === 'granted') {
-      localStorage.setItem(REMINDER_KEY, '1');
-      scheduleNextReminder();
-      updateReminderBtn();
-    } else {
-      alert('Tillstånd för notiser nekades. Aktivera det i webbläsarens inställningar.');
-    }
+function sendReminderEmail() {
+  var t = document.getElementById('reminder-time').value;
+  emailjs.send('service_ks0fkff', 'template_6s8rorp', {
+    time:    t,
+    message: 'Dags att öva gitarr! Öppna appen och kör igenom ett par grepp.'
   });
 }
 
-// Starta automatiskt om det var aktiverat senast
-updateReminderBtn();
-if (localStorage.getItem(REMINDER_KEY) === '1' && 'Notification' in window) {
-  if (Notification.permission === 'granted') {
-    scheduleNextReminder();
+function toggleEmailReminder() {
+  var on = localStorage.getItem(EMAIL_KEY) === '1';
+  if (on) {
+    localStorage.setItem(EMAIL_KEY, '0');
+    if (emailTimer) clearTimeout(emailTimer);
+    emailTimer = null;
   } else {
-    // Tillstånd har dragits tillbaka, rensa
-    localStorage.setItem(REMINDER_KEY, '0');
-    updateReminderBtn();
+    localStorage.setItem(EMAIL_KEY, '1');
+    scheduleEmail();
   }
+  updateReminderBtn();
 }
+
+// Återställ och starta om aktiv påminnelse vid sidladdning
+updateReminderBtn();
+if (localStorage.getItem(EMAIL_KEY) === '1') scheduleEmail();
 </script>
 </body>
 </html>
