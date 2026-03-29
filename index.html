@@ -88,6 +88,7 @@ select:hover { border-color: #555; }
   <button class="tab" id="tab-modal" onclick="switchTab('modal')">Modal</button>
   <div class="email-reminder">
     <button class="reminder-btn" id="reminder-btn" onclick="toggleEmailReminder()">📧 Påminn 16:30</button>
+    <button class="reminder-btn" onclick="testEmail()">Testa nu</button>
   </div>
 </div>
 
@@ -487,10 +488,24 @@ function scheduleEmail() {
 }
 
 function sendReminderEmail() {
-  var t = document.getElementById('reminder-time').value;
   emailjs.send('service_ks0fkff', 'template_6s8rorp', {
-    time:    t,
+    time:    '16:30',
     message: 'Dags att öva gitarr! Öppna appen och kör igenom ett par grepp.'
+  }).then(function() {
+    console.log('EmailJS: mail skickat');
+  }, function(err) {
+    console.error('EmailJS fel:', JSON.stringify(err));
+  });
+}
+
+function testEmail() {
+  emailjs.send('service_ks0fkff', 'template_6s8rorp', {
+    time:    'TEST',
+    message: 'Det här är ett testmail från Gitarrverktyget.'
+  }).then(function() {
+    alert('Mail skickat! Kolla inkorgen.');
+  }, function(err) {
+    alert('Fel: ' + JSON.stringify(err));
   });
 }
 
