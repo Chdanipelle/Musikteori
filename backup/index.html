@@ -6,17 +6,15 @@
 <title>Pentatonisk skala</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #111; color: #ddd; font-family: system-ui, sans-serif; padding: 16px 12px; }
+  body { background: #111; color: #ddd; font-family: system-ui, sans-serif; padding: 32px 24px; }
   .controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
   select { background: #222; color: #ddd; border: 1px solid #444; border-radius: 6px; padding: 6px 10px; font-size: 13px; cursor: pointer; margin-right: 8px; }
   button { padding: 6px 14px; border-radius: 20px; border: 1px solid #444; background: transparent; color: #888; font-size: 12px; cursor: pointer; transition: all 0.15s; }
   button:hover { color: #ddd; border-color: #666; }
   button.active { background: rgba(240,168,48,0.15); border-color: #f0a830; color: #f0a830; }
   button.all-active { background: #222; border-color: #555; color: #ddd; }
-  button.mode-active { background: rgba(100,210,130,0.15); border-color: #5c5; color: #5c5; }
-  .sep { width: 1px; height: 20px; background: #333; display: inline-block; margin: 0 2px; }
-  #glabel { font-size: 12px; color: #666; margin-bottom: 8px; min-height: 16px; }
-  svg { display: block; width: 100%; max-width: 580px; }
+  #glabel { font-size: 12px; color: #666; margin-bottom: 10px; min-height: 16px; }
+  svg { display: block; width: 100%; }
   .legend { display: flex; gap: 16px; margin-top: 10px; font-size: 12px; color: #666; align-items: center; }
   .ld { width: 11px; height: 11px; border-radius: 50%; display: inline-block; margin-right: 4px; vertical-align: middle; }
 </style>
@@ -29,9 +27,6 @@
     <option value="6">Eb</option><option value="7">E</option><option value="8">F</option>
     <option value="9">F#</option><option value="10">G</option><option value="11">G#</option>
   </select>
-  <button id="btn-moll" class="mode-active" onclick="selectMode('moll')">Moll</button>
-  <button id="btn-dur" onclick="selectMode('dur')">Dur</button>
-  <span class="sep"></span>
   <button id="btn-all" class="all-active" onclick="selectG('all')">Alla</button>
   <button id="btn-1" class="active" onclick="selectG(1)">Grepp 1</button>
   <button id="btn-2" onclick="selectG(2)">Grepp 2</button>
@@ -99,32 +94,13 @@ var greppDefs=[
   [[5,8,'5'],[5,10,'m7'],[4,8,'m7'],[4,10,'R'],[3,8,'4'],[3,10,'5'],[2,8,'m3'],[2,9,'4'],[1,9,'m3'],[1,10,'4'],[0,8,'5'],[0,10,'m7']],
   [[5,10,'m7'],[4,10,'4'],[4,11,'5'],[3,10,'m3'],[3,12,'4'],[2,9,'m7'],[2,11,'R'],[1,10,'5'],[1,12,'m7'],[0,10,'m7'],[0,12,'R']]
 ];
-var greppDefs={
-  moll:[
-    [[5,0,'R'],[5,3,'m3'],[4,0,'R'],[4,2,'4'],[3,0,'5'],[3,2,'m7'],[2,0,'m7'],[2,2,'R'],[1,0,'m3'],[1,3,'4'],[0,0,'R'],[0,3,'m3']],
-    [[5,3,'m3'],[5,6,'4'],[4,3,'4'],[4,6,'R'],[3,3,'R'],[3,5,'m3'],[2,3,'m3'],[2,5,'4'],[1,4,'4'],[1,6,'R'],[0,3,'m3'],[0,6,'4']],
-    [[5,6,'4'],[5,8,'R'],[4,6,'R'],[4,8,'m3'],[3,5,'m3'],[3,8,'4'],[2,5,'m3'],[2,7,'4'],[1,6,'R'],[1,8,'m3'],[0,6,'4'],[0,8,'R']],
-    [[5,8,'5'],[5,10,'m7'],[4,8,'m7'],[4,10,'R'],[3,8,'4'],[3,10,'5'],[2,8,'m3'],[2,9,'4'],[1,9,'m3'],[1,10,'4'],[0,8,'5'],[0,10,'m7']],
-    [[5,10,'m7'],[4,10,'4'],[4,11,'5'],[3,10,'m3'],[3,12,'4'],[2,9,'m7'],[2,11,'R'],[1,10,'5'],[1,12,'m7'],[0,10,'m7'],[0,12,'R']]
-  ],
-  dur:[
-    [[5,0,'R'],[5,2,'2'],[4,-1,'3'],[4,2,'5'],[3,-1,'6'],[3,2,'R'],[2,-1,'2'],[2,1,'3'],[1,0,'5'],[1,2,'6'],[0,0,'R'],[0,2,'2']],
-    [[5,2,'2'],[5,4,'3'],[4,2,'5'],[4,4,'6'],[3,2,'R'],[3,4,'2'],[2,1,'3'],[2,4,'5'],[1,2,'6'],[1,5,'R'],[0,2,'2'],[0,4,'3']],
-    [[5,4,'3'],[5,7,'5'],[4,4,'6'],[4,7,'R'],[3,4,'2'],[3,6,'3'],[2,4,'5'],[2,6,'6'],[1,5,'R'],[1,7,'2'],[0,4,'3'],[0,7,'5']],
-    [[5,7,'5'],[5,9,'6'],[4,7,'R'],[4,9,'2'],[3,6,'3'],[3,9,'5'],[2,6,'6'],[2,9,'R'],[1,7,'2'],[1,9,'3'],[0,7,'5'],[0,9,'6']],
-    [[5,-3,'6'],[5,0,'R'],[4,-3,'2'],[4,-1,'3'],[3,-3,'5'],[3,-1,'6'],[2,-3,'R'],[2,-1,'2'],[1,-3,'3'],[1,0,'5'],[0,-3,'6'],[0,0,'R']]
-  ]
-};
-var greppLabels={
-  moll:{1:'Grepp 1 — rotnoten på E- och A-strängen',2:'Grepp 2 — börjar på m3',3:'Grepp 3 — börjar på kvart (4)',4:'Grepp 4 — börjar på kvint (5)',5:'Grepp 5 — börjar på m7',all:'Alla grepp'},
-  dur:{1:'Grepp 1 — rotnoten på E-strängarna',2:'Grepp 2 — börjar på 2an',3:'Grepp 3 — börjar på ters (3)',4:'Grepp 4 — börjar på kvint (5)',5:'Grepp 5 — börjar på sext (6)',all:'Alla grepp'}
-};
-var curGrepp=1,curKey=0,curMode='moll',ns='http://www.w3.org/2000/svg';
+var greppLabels={1:'Grepp 1 — rotnoten på E- och A-strängen',2:'Grepp 2 — börjar på m3',3:'Grepp 3 — börjar på kvart (4)',4:'Grepp 4 — börjar på kvint (5)',5:'Grepp 5 — börjar på m7',all:'Alla grepp'};
+var curGrepp=1,curKey=0,ns='http://www.w3.org/2000/svg';
 function render(){
   var c=document.getElementById('dots');
   while(c.firstChild)c.removeChild(c.firstChild);
   var rf=keyToRootFret[curKey];
-  greppDefs[curMode].forEach(function(gdef,gi){
+  greppDefs.forEach(function(gdef,gi){
     var n=gi+1,w=document.createElementNS(ns,'g');
     w.id='dg'+n;
     w.style.opacity=(curGrepp==='all'||curGrepp===n)?'1':'0.06';
@@ -147,13 +123,7 @@ function render(){
     });
     c.appendChild(w);
   });
-  document.getElementById('glabel').textContent=keyNames[curKey]+' '+(curMode==='moll'?'moll':'dur')+'-pentatonisk — '+greppLabels[curMode][curGrepp];
-}
-function selectMode(m){
-  curMode=m;
-  document.getElementById('btn-moll').className=m==='moll'?'mode-active':'';
-  document.getElementById('btn-dur').className=m==='dur'?'mode-active':'';
-  render();selectG(curGrepp);
+  document.getElementById('glabel').textContent=keyNames[curKey]+' moll-pentatonisk — '+greppLabels[curGrepp];
 }
 function selectG(g){
   curGrepp=g;
@@ -165,7 +135,7 @@ function selectG(g){
     var n=parseInt(el.id.replace('dg',''));
     el.style.opacity=(g==='all'||g===n)?'1':'0.06';
   });
-  document.getElementById('glabel').textContent=keyNames[curKey]+' '+(curMode==='moll'?'moll':'dur')+'-pentatonisk — '+greppLabels[curMode][g];
+  document.getElementById('glabel').textContent=keyNames[curKey]+' moll-pentatonisk — '+greppLabels[g];
 }
 document.getElementById('key-select').addEventListener('change',function(){curKey=parseInt(this.value);render();selectG(curGrepp);});
 render();selectG(1);
