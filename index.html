@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pentatonisk skala</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #111; color: #ddd; font-family: system-ui, sans-serif; padding: 32px 24px; }
+  .controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+  select { background: #222; color: #ddd; border: 1px solid #444; border-radius: 6px; padding: 6px 10px; font-size: 13px; cursor: pointer; margin-right: 8px; }
+  button { padding: 6px 14px; border-radius: 20px; border: 1px solid #444; background: transparent; color: #888; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+  button:hover { color: #ddd; border-color: #666; }
+  button.active { background: rgba(240,168,48,0.15); border-color: #f0a830; color: #f0a830; }
+  button.all-active { background: #222; border-color: #555; color: #ddd; }
+  #glabel { font-size: 12px; color: #666; margin-bottom: 10px; min-height: 16px; }
+  svg { display: block; width: 100%; }
+  .legend { display: flex; gap: 16px; margin-top: 10px; font-size: 12px; color: #666; align-items: center; }
+  .ld { width: 11px; height: 11px; border-radius: 50%; display: inline-block; margin-right: 4px; vertical-align: middle; }
+</style>
+</head>
+<body>
+<div class="controls">
+  <select id="key-select">
+    <option value="0">A</option><option value="1">Bb</option><option value="2">B</option>
+    <option value="3">C</option><option value="4">C#</option><option value="5">D</option>
+    <option value="6">Eb</option><option value="7">E</option><option value="8">F</option>
+    <option value="9">F#</option><option value="10">G</option><option value="11">G#</option>
+  </select>
+  <button id="btn-all" class="all-active" onclick="selectG('all')">Alla</button>
+  <button id="btn-1" class="active" onclick="selectG(1)">Grepp 1</button>
+  <button id="btn-2" onclick="selectG(2)">Grepp 2</button>
+  <button id="btn-3" onclick="selectG(3)">Grepp 3</button>
+  <button id="btn-4" onclick="selectG(4)">Grepp 4</button>
+  <button id="btn-5" onclick="selectG(5)">Grepp 5</button>
+</div>
+<div id="glabel"></div>
+<svg viewBox="0 0 680 215">
+  <line x1="60" y1="12" x2="60" y2="190" stroke="rgba(255,255,255,0.5)" stroke-width="3.5"/>
+  <line x1="104" y1="12" x2="104" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+  <line x1="148" y1="12" x2="148" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+  <line x1="192" y1="12" x2="192" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+  <line x1="236" y1="12" x2="236" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+  <line x1="280" y1="12" x2="280" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+  <line x1="324" y1="12" x2="324" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+  <line x1="368" y1="12" x2="368" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+  <line x1="412" y1="12" x2="412" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+  <line x1="456" y1="12" x2="456" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+  <line x1="500" y1="12" x2="500" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+  <line x1="544" y1="12" x2="544" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+  <line x1="588" y1="12" x2="588" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+  <line x1="632" y1="12" x2="632" y2="190" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+  <line x1="36" y1="22"  x2="670" y2="22"  stroke="rgba(255,255,255,0.25)" stroke-width="0.8"/>
+  <line x1="36" y1="54"  x2="670" y2="54"  stroke="rgba(255,255,255,0.28)" stroke-width="1.1"/>
+  <line x1="36" y1="86"  x2="670" y2="86"  stroke="rgba(255,255,255,0.32)" stroke-width="1.4"/>
+  <line x1="36" y1="118" x2="670" y2="118" stroke="rgba(255,255,255,0.36)" stroke-width="1.8"/>
+  <line x1="36" y1="150" x2="670" y2="150" stroke="rgba(255,255,255,0.40)" stroke-width="2.1"/>
+  <line x1="36" y1="178" x2="670" y2="178" stroke="rgba(255,255,255,0.45)" stroke-width="2.4"/>
+  <text x="46" y="22"  text-anchor="middle" dominant-baseline="central" font-size="11" fill="rgba(255,255,255,0.3)">e</text>
+  <text x="46" y="54"  text-anchor="middle" dominant-baseline="central" font-size="11" fill="rgba(255,255,255,0.3)">B</text>
+  <text x="46" y="86"  text-anchor="middle" dominant-baseline="central" font-size="11" fill="rgba(255,255,255,0.3)">G</text>
+  <text x="46" y="118" text-anchor="middle" dominant-baseline="central" font-size="11" fill="rgba(255,255,255,0.3)">D</text>
+  <text x="46" y="150" text-anchor="middle" dominant-baseline="central" font-size="11" fill="rgba(255,255,255,0.3)">A</text>
+  <text x="46" y="178" text-anchor="middle" dominant-baseline="central" font-size="11" fill="rgba(255,255,255,0.3)">E</text>
+  <text x="82"  y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">1</text>
+  <text x="126" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">2</text>
+  <text x="170" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">3</text>
+  <text x="214" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">4</text>
+  <text x="258" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">5</text>
+  <text x="302" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">6</text>
+  <text x="346" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">7</text>
+  <text x="390" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">8</text>
+  <text x="434" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">9</text>
+  <text x="478" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">10</text>
+  <text x="522" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">11</text>
+  <text x="566" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">12</text>
+  <text x="610" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">13</text>
+  <text x="654" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">14</text>
+  <g id="dots"></g>
+</svg>
+<div class="legend">
+  <span><span class="ld" style="background:#f0a830"></span>Rotnot (R)</span>
+  <span><span class="ld" style="background:#4a90d9"></span>Övriga toner</span>
+</div>
+<script>
+function bx(n){return 60+(n-0.5)*44;}
+var sy=[22,54,86,118,150,178];
+var keyToRootFret=[5,6,7,8,9,10,11,12,1,2,3,4];
+var keyNames=['A','Bb','B','C','C#','D','Eb','E','F','F#','G','G#'];
+var greppDefs=[
+  [[5,0,'R'],[5,3,'m3'],[4,0,'R'],[4,2,'4'],[3,0,'5'],[3,2,'m7'],[2,0,'m7'],[2,2,'R'],[1,0,'m3'],[1,3,'4'],[0,0,'R'],[0,3,'m3']],
+  [[5,3,'m3'],[5,6,'4'],[4,3,'4'],[4,6,'R'],[3,3,'R'],[3,5,'m3'],[2,3,'m3'],[2,5,'4'],[1,4,'4'],[1,6,'R'],[0,3,'m3'],[0,6,'4']],
+  [[5,6,'4'],[5,8,'R'],[4,6,'R'],[4,8,'m3'],[3,5,'m3'],[3,8,'4'],[2,5,'m3'],[2,7,'4'],[1,6,'R'],[1,8,'m3'],[0,6,'4'],[0,8,'R']],
+  [[5,8,'5'],[5,10,'m7'],[4,8,'m7'],[4,10,'R'],[3,8,'4'],[3,10,'5'],[2,8,'m3'],[2,9,'4'],[1,9,'m3'],[1,10,'4'],[0,8,'5'],[0,10,'m7']],
+  [[5,10,'m7'],[4,10,'4'],[4,11,'5'],[3,10,'m3'],[3,12,'4'],[2,9,'m7'],[2,11,'R'],[1,10,'5'],[1,12,'m7'],[0,10,'m7'],[0,12,'R']]
+];
+var greppLabels={1:'Grepp 1 — rotnoten på E- och A-strängen',2:'Grepp 2 — börjar på m3',3:'Grepp 3 — börjar på kvart (4)',4:'Grepp 4 — börjar på kvint (5)',5:'Grepp 5 — börjar på m7',all:'Alla grepp'};
+var curGrepp=1,curKey=0,ns='http://www.w3.org/2000/svg';
+function render(){
+  var c=document.getElementById('dots');
+  while(c.firstChild)c.removeChild(c.firstChild);
+  var rf=keyToRootFret[curKey];
+  greppDefs.forEach(function(gdef,gi){
+    var n=gi+1,w=document.createElementNS(ns,'g');
+    w.id='dg'+n;
+    w.style.opacity=(curGrepp==='all'||curGrepp===n)?'1':'0.06';
+    w.style.transition='opacity 0.2s';
+    gdef.forEach(function(nd){
+      var f=rf+nd[1];
+      while(f>14)f-=12;while(f<1)f+=12;
+      if(f<1||f>14)return;
+      var g=document.createElementNS(ns,'g');
+      var ci=document.createElementNS(ns,'circle');
+      ci.setAttribute('cx',bx(f));ci.setAttribute('cy',sy[nd[0]]);ci.setAttribute('r','11');
+      ci.setAttribute('fill',nd[2]==='R'?'#f0a830':'#4a90d9');
+      var t=document.createElementNS(ns,'text');
+      t.setAttribute('x',bx(f));t.setAttribute('y',sy[nd[0]]);
+      t.setAttribute('text-anchor','middle');t.setAttribute('dominant-baseline','central');
+      t.setAttribute('font-size','9');t.setAttribute('font-weight','500');
+      t.setAttribute('fill',nd[2]==='R'?'#2a1800':'#e8f4ff');
+      t.textContent=nd[2];
+      g.appendChild(ci);g.appendChild(t);w.appendChild(g);
+    });
+    c.appendChild(w);
+  });
+  document.getElementById('glabel').textContent=keyNames[curKey]+' moll-pentatonisk — '+greppLabels[curGrepp];
+}
+function selectG(g){
+  curGrepp=g;
+  ['all',1,2,3,4,5].forEach(function(k){
+    var b=document.getElementById('btn-'+k);
+    if(b)b.className=k===g?(g==='all'?'all-active':'active'):'';
+  });
+  document.querySelectorAll('[id^="dg"]').forEach(function(el){
+    var n=parseInt(el.id.replace('dg',''));
+    el.style.opacity=(g==='all'||g===n)?'1':'0.06';
+  });
+  document.getElementById('glabel').textContent=keyNames[curKey]+' moll-pentatonisk — '+greppLabels[g];
+}
+document.getElementById('key-select').addEventListener('change',function(){curKey=parseInt(this.value);render();selectG(curGrepp);});
+render();selectG(1);
+</script>
+</body>
+</html>
