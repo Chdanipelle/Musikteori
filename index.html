@@ -15,6 +15,9 @@ body { background: #111; color: #ddd; font-family: system-ui, sans-serif; paddin
 /* Tab bar */
 .tab-bar { display: flex; border-bottom: 1px solid #2a2a2a; margin-bottom: 20px; gap: 0; align-items: center; }
 .email-reminder { margin-left: auto; display: flex; align-items: center; gap: 6px; margin-bottom: 1px; }
+#reminder-time { background: #1a1a1a; color: #888; border: 1px solid #2a2a2a; border-radius: 6px; padding: 4px 9px; font-size: 12px; outline: none; width: 62px; text-align: center; }
+#reminder-time:focus { border-color: #555; color: #ccc; }
+#reminder-time::placeholder { color: #444; }
 .reminder-btn { background: none; border: 1px solid #2a2a2a; border-radius: 20px; color: #444; font-size: 11px; padding: 4px 11px; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
 .reminder-btn:hover { color: #888; border-color: #444; }
 .reminder-btn.on { color: #f0a830; border-color: rgba(240,168,48,0.4); }
@@ -87,8 +90,9 @@ select:hover { border-color: #555; }
   <button class="tab active" id="tab-penta" onclick="switchTab('penta')">Pentatonisk</button>
   <button class="tab" id="tab-modal" onclick="switchTab('modal')">Modal</button>
   <div class="email-reminder">
-    <button class="reminder-btn" id="reminder-btn" onclick="toggleEmailReminder()">📧 Påminn 16:30</button>
-    <button class="reminder-btn" onclick="testEmail()">Testa nu</button>
+    <input type="text" id="reminder-time" placeholder="HH:MM" maxlength="5">
+    <button class="reminder-btn" id="reminder-btn" onclick="toggleEmailReminder()">📧 Påminn</button>
+    <button class="reminder-btn" onclick="testEmail()">Testa</button>
   </div>
 </div>
 
@@ -467,16 +471,27 @@ var EMAIL_KEY  = 'guitarEmailReminder';
 
 function updateReminderBtn() {
   var on  = localStorage.getItem(EMAIL_KEY) === '1';
+  var t   = localStorage.getItem('guitarReminderTime') || '';
   var btn = document.getElementById('reminder-btn');
   btn.className = 'reminder-btn' + (on ? ' on' : '');
-  btn.textContent = on ? '📧 Aktiv 16:30' : '📧 Påminn 16:30';
+  btn.textContent = on ? ('📧 Aktiv ' + t) : '📧 Påminn';
+}
+
+function parseTime(val) {
+  var m = val.match(/^(\d{1,2})[:\.](\d{2})$/);
+  if (!m) return null;
+  var h = parseInt(m[1]), min = parseInt(m[2]);
+  if (h < 0 || h > 23 || min < 0 || min > 59) return null;
+  return { h: h, m: min };
 }
 
 function scheduleEmail() {
   if (emailTimer) clearTimeout(emailTimer);
+  var t = parseTime(document.getElementById('reminder-time').value);
+  if (!t) return;
   var now  = new Date();
   var next = new Date();
-  next.setHours(16, 30, 0, 0);
+  next.setHours(t.h, t.m, 0, 0);
   if (now >= next) next.setDate(next.getDate() + 1);
   var ms = next - now;
   emailTimer = setTimeout(function() {
@@ -515,14 +530,20 @@ function toggleEmailReminder() {
     localStorage.setItem(EMAIL_KEY, '0');
     if (emailTimer) clearTimeout(emailTimer);
     emailTimer = null;
-  } else {
-    localStorage.setItem(EMAIL_KEY, '1');
-    scheduleEmail();
+    updateReminderBtn();
+    return;
   }
+  var val = document.getElementById('reminder-time').value.trim();
+  if (!parseTime(val)) { alert('Ange tid som HH:MM, t.ex. 16:30'); return; }
+  localStorage.setItem(EMAIL_KEY, '1');
+  localStorage.setItem('guitarReminderTime', val);
+  scheduleEmail();
   updateReminderBtn();
 }
 
-// Återställ och starta om aktiv påminnelse vid sidladdning
+// Återställ sparad tid och starta om aktiv påminnelse vid sidladdning
+var savedTime = localStorage.getItem('guitarReminderTime');
+if (savedTime) document.getElementById('reminder-time').value = savedTime;
 updateReminderBtn();
 if (localStorage.getItem(EMAIL_KEY) === '1') scheduleEmail();
 

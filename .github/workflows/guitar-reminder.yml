@@ -1,0 +1,23 @@
+name: Guitar Practice Reminder
+
+on:
+  schedule:
+    - cron: '30 14 * * *'  # 16:30 svensk sommartid (UTC+2), 15:30 vintertid
+
+jobs:
+  send-reminder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skicka påminnelsemail via EmailJS
+        run: |
+          curl -s -X POST https://api.emailjs.com/api/v1.0/email/send \
+            -H "Content-Type: application/json" \
+            -d '{
+              "service_id": "service_ks0fkff",
+              "template_id": "template_6s8rorp",
+              "user_id": "fX5GM88LRQwx-BYPX",
+              "template_params": {
+                "time": "16:30",
+                "message": "Dags att öva gitarr! Öppna appen och kör igenom ett par grepp."
+              }
+            }'
