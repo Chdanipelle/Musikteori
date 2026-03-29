@@ -81,6 +81,7 @@ select:hover { border-color: #555; }
 <div class="tab-bar">
   <button class="tab active" id="tab-penta" onclick="switchTab('penta')">Pentatonisk</button>
   <button class="tab" id="tab-modal" onclick="switchTab('modal')">Modal</button>
+  <button class="tab" id="tab-hals" onclick="switchTab('hals')">Hals</button>
 </div>
 
 <!-- ═══ PENTATONISK ═══ -->
@@ -233,6 +234,75 @@ select:hover { border-color: #555; }
   <div class="legend">
     <span><span class="ld" style="background:#f0a830"></span>Rotnot (R)</span>
     <span><span class="ld" style="background:#4a90d9"></span>Skalton</span>
+  </div>
+</div>
+
+<!-- ═══ HALS ═══ -->
+<div id="panel-hals" style="display:none">
+  <div class="controls">
+    <select id="h-key">
+      <option value="0">A</option><option value="1">Bb</option><option value="2">B</option>
+      <option value="3">C</option><option value="4">C#</option><option value="5">D</option>
+      <option value="6">Eb</option><option value="7">E</option><option value="8">F</option>
+      <option value="9">F#</option><option value="10">G</option><option value="11">G#</option>
+    </select>
+  </div>
+  <svg class="fretboard" viewBox="0 0 670 220">
+    <!-- Nut -->
+    <line x1="55" y1="12" x2="55" y2="192" stroke="rgba(255,255,255,0.5)" stroke-width="3.5"/>
+    <!-- Fret lines -->
+    <line x1="105" y1="12" x2="105" y2="192" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="155" y1="12" x2="155" y2="192" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="205" y1="12" x2="205" y2="192" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="255" y1="12" x2="255" y2="192" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="305" y1="12" x2="305" y2="192" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="355" y1="12" x2="355" y2="192" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="405" y1="12" x2="405" y2="192" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="455" y1="12" x2="455" y2="192" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="505" y1="12" x2="505" y2="192" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="555" y1="12" x2="555" y2="192" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="605" y1="12" x2="605" y2="192" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="655" y1="12" x2="655" y2="192" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <!-- Strings -->
+    <line x1="18" y1="22"  x2="660" y2="22"  stroke="rgba(255,255,255,0.25)" stroke-width="0.8"/>
+    <line x1="18" y1="54"  x2="660" y2="54"  stroke="rgba(255,255,255,0.28)" stroke-width="1.1"/>
+    <line x1="18" y1="86"  x2="660" y2="86"  stroke="rgba(255,255,255,0.32)" stroke-width="1.4"/>
+    <line x1="18" y1="118" x2="660" y2="118" stroke="rgba(255,255,255,0.36)" stroke-width="1.8"/>
+    <line x1="18" y1="150" x2="660" y2="150" stroke="rgba(255,255,255,0.40)" stroke-width="2.1"/>
+    <line x1="18" y1="178" x2="660" y2="178" stroke="rgba(255,255,255,0.45)" stroke-width="2.4"/>
+    <!-- Position markers (frets 3,5,7,9,12) -->
+    <circle cx="180" cy="102" r="4" fill="rgba(255,255,255,0.07)"/>
+    <circle cx="280" cy="102" r="4" fill="rgba(255,255,255,0.07)"/>
+    <circle cx="380" cy="102" r="4" fill="rgba(255,255,255,0.07)"/>
+    <circle cx="480" cy="102" r="4" fill="rgba(255,255,255,0.07)"/>
+    <circle cx="630" cy="70"  r="4" fill="rgba(255,255,255,0.07)"/>
+    <circle cx="630" cy="134" r="4" fill="rgba(255,255,255,0.07)"/>
+    <!-- String labels -->
+    <text x="10" y="22"  text-anchor="middle" dominant-baseline="central" font-size="10" fill="rgba(255,255,255,0.3)">e</text>
+    <text x="10" y="54"  text-anchor="middle" dominant-baseline="central" font-size="10" fill="rgba(255,255,255,0.3)">B</text>
+    <text x="10" y="86"  text-anchor="middle" dominant-baseline="central" font-size="10" fill="rgba(255,255,255,0.3)">G</text>
+    <text x="10" y="118" text-anchor="middle" dominant-baseline="central" font-size="10" fill="rgba(255,255,255,0.3)">D</text>
+    <text x="10" y="150" text-anchor="middle" dominant-baseline="central" font-size="10" fill="rgba(255,255,255,0.3)">A</text>
+    <text x="10" y="178" text-anchor="middle" dominant-baseline="central" font-size="10" fill="rgba(255,255,255,0.3)">E</text>
+    <!-- Fret numbers -->
+    <text x="30"  y="210" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.2)">0</text>
+    <text x="80"  y="210" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.2)">1</text>
+    <text x="130" y="210" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.2)">2</text>
+    <text x="180" y="210" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.2)">3</text>
+    <text x="230" y="210" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.2)">4</text>
+    <text x="280" y="210" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.2)">5</text>
+    <text x="330" y="210" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.2)">6</text>
+    <text x="380" y="210" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.2)">7</text>
+    <text x="430" y="210" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.2)">8</text>
+    <text x="480" y="210" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.2)">9</text>
+    <text x="530" y="210" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.2)">10</text>
+    <text x="580" y="210" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.2)">11</text>
+    <text x="630" y="210" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.2)">12</text>
+    <g id="hals-dots"></g>
+  </svg>
+  <div class="legend">
+    <span><span class="ld" style="background:#f0a830"></span>Vald grundton</span>
+    <span><span class="ld" style="background:#222; border:1px solid rgba(255,255,255,0.2)"></span>Övriga toner</span>
   </div>
 </div>
 </div><!-- #app -->
@@ -442,13 +512,51 @@ document.getElementById('m-mode').addEventListener('change',function(){
 function switchTab(t){
   document.getElementById('panel-penta').style.display=t==='penta'?'':'none';
   document.getElementById('panel-modal').style.display=t==='modal'?'':'none';
+  document.getElementById('panel-hals').style.display=t==='hals'?'':'none';
   document.getElementById('tab-penta').className='tab'+(t==='penta'?' active':'');
   document.getElementById('tab-modal').className='tab'+(t==='modal'?' active':'');
+  document.getElementById('tab-hals').className='tab'+(t==='hals'?' active':'');
 }
+
+// ── Hals ───────────────────────────────────────────────────────
+var curHalsKey=0;
+
+function renderHals(){
+  var c=document.getElementById('hals-dots');
+  while(c.firstChild)c.removeChild(c.firstChild);
+  var root=rootSemitones[curHalsKey];
+  for(var s=0;s<6;s++){
+    for(var f=0;f<=12;f++){
+      var note=(openNotes[s]+f)%12;
+      var isRoot=(note===root);
+      var cx=f===0?30:55+(f-0.5)*50;
+      var cy=sy[s];
+      var name=chromatic[note];
+      var g=document.createElementNS(ns,'g');
+      var ci=document.createElementNS(ns,'circle');
+      ci.setAttribute('cx',cx); ci.setAttribute('cy',cy); ci.setAttribute('r','10');
+      ci.setAttribute('fill',isRoot?'#f0a830':'#1e1e1e');
+      ci.setAttribute('stroke',isRoot?'none':'rgba(255,255,255,0.18)');
+      ci.setAttribute('stroke-width','1');
+      var t=document.createElementNS(ns,'text');
+      t.setAttribute('x',cx); t.setAttribute('y',cy);
+      t.setAttribute('text-anchor','middle'); t.setAttribute('dominant-baseline','central');
+      t.setAttribute('font-size',name.length>1?'7':'8'); t.setAttribute('font-weight','500');
+      t.setAttribute('fill',isRoot?'#2a1800':'#bbb');
+      t.textContent=name;
+      g.appendChild(ci); g.appendChild(t); c.appendChild(g);
+    }
+  }
+}
+
+document.getElementById('h-key').addEventListener('change',function(){
+  curHalsKey=parseInt(this.value); renderHals();
+});
 
 // ── Init ───────────────────────────────────────────────────────
 render(); selectG(1);
 renderModal();
+renderHals();
 
 // ── PWA service worker ─────────────────────────────────────────
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
