@@ -7,17 +7,12 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#111111">
 <link rel="apple-touch-icon" href="icon.svg">
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #111; color: #ddd; font-family: system-ui, sans-serif; padding: 20px 16px; }
 
 /* Tab bar */
 .tab-bar { display: flex; border-bottom: 1px solid #2a2a2a; margin-bottom: 20px; gap: 0; align-items: center; }
-.email-reminder { margin-left: auto; display: flex; align-items: center; gap: 6px; margin-bottom: 1px; }
-.reminder-btn { background: none; border: 1px solid #2a2a2a; border-radius: 20px; color: #444; font-size: 11px; padding: 4px 11px; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
-.reminder-btn:hover { color: #888; border-color: #444; }
-.reminder-btn.on { color: #f0a830; border-color: rgba(240,168,48,0.4); }
 .tab { background: none; border: none; border-bottom: 2px solid transparent; color: #555; padding: 9px 18px; cursor: pointer; font-size: 13px; font-weight: 500; letter-spacing: 0.2px; margin-bottom: -1px; transition: color 0.15s; }
 .tab:hover { color: #aaa; }
 .tab.active { color: #f0a830; border-bottom-color: #f0a830; }
@@ -86,9 +81,6 @@ select:hover { border-color: #555; }
 <div class="tab-bar">
   <button class="tab active" id="tab-penta" onclick="switchTab('penta')">Pentatonisk</button>
   <button class="tab" id="tab-modal" onclick="switchTab('modal')">Modal</button>
-  <div class="email-reminder">
-    <button class="reminder-btn" id="reminder-btn" onclick="toggleEmailReminder()">📧 Påminn 16:30</button>
-  </div>
 </div>
 
 <!-- ═══ PENTATONISK ═══ -->
@@ -257,11 +249,11 @@ var bxP=function(n){return 60+(n-0.5)*44;};
 var keyToRootFret=[5,6,7,8,9,10,11,12,1,2,3,4];
 var greppDefs={
   moll:[
-    [[5,0,'R'],[5,3,'m3'],[4,0,'R'],[4,2,'4'],[3,0,'5'],[3,2,'m7'],[2,0,'m7'],[2,2,'R'],[1,0,'m3'],[1,3,'4'],[0,0,'R'],[0,3,'m3']],
-    [[5,3,'m3'],[5,6,'4'],[4,3,'4'],[4,6,'R'],[3,3,'R'],[3,5,'m3'],[2,3,'m3'],[2,5,'4'],[1,4,'4'],[1,6,'R'],[0,3,'m3'],[0,6,'4']],
-    [[5,6,'4'],[5,8,'R'],[4,6,'R'],[4,8,'m3'],[3,5,'m3'],[3,8,'4'],[2,5,'m3'],[2,7,'4'],[1,6,'R'],[1,8,'m3'],[0,6,'4'],[0,8,'R']],
-    [[5,8,'5'],[5,10,'m7'],[4,8,'m7'],[4,10,'R'],[3,8,'4'],[3,10,'5'],[2,8,'m3'],[2,9,'4'],[1,9,'m3'],[1,10,'4'],[0,8,'5'],[0,10,'m7']],
-    [[5,10,'m7'],[4,10,'4'],[4,11,'5'],[3,10,'m3'],[3,12,'4'],[2,9,'m7'],[2,11,'R'],[1,10,'5'],[1,12,'m7'],[0,10,'m7'],[0,12,'R']]
+    [[5,0,'R'],[5,3,'m3'],[4,0,'4'],[4,2,'5'],[3,0,'m7'],[3,2,'R'],[2,0,'m3'],[2,2,'4'],[1,0,'5'],[1,3,'m7'],[0,0,'R'],[0,3,'m3']],
+    [[5,3,'m3'],[5,5,'4'],[4,2,'5'],[4,5,'m7'],[3,2,'R'],[3,5,'m3'],[2,2,'4'],[2,4,'5'],[1,3,'m7'],[1,5,'R'],[0,3,'m3'],[0,5,'4']],
+    [[5,5,'4'],[5,7,'5'],[4,5,'m7'],[4,7,'R'],[3,5,'m3'],[3,7,'4'],[2,4,'5'],[2,7,'m7'],[1,5,'R'],[1,8,'m3'],[0,5,'4'],[0,7,'5']],
+    [[5,7,'5'],[5,10,'m7'],[4,7,'R'],[4,10,'m3'],[3,7,'4'],[3,9,'5'],[2,7,'m7'],[2,9,'R'],[1,8,'m3'],[1,10,'4'],[0,7,'5'],[0,10,'m7']],
+    [[5,-2,'m7'],[5,0,'R'],[4,-2,'m3'],[4,0,'4'],[3,-3,'5'],[3,0,'m7'],[2,-3,'R'],[2,0,'m3'],[1,-2,'4'],[1,0,'5'],[0,-2,'m7'],[0,0,'R']]
   ],
   dur:[
     [[5,0,'R'],[5,2,'2'],[4,-1,'3'],[4,2,'5'],[3,-1,'6'],[3,2,'R'],[2,-1,'2'],[2,1,'3'],[1,0,'5'],[1,2,'6'],[0,0,'R'],[0,2,'2']],
@@ -272,7 +264,7 @@ var greppDefs={
   ]
 };
 var greppLabels={
-  moll:{1:'Grepp 1 — rotnoten på E- och A-strängen',2:'Grepp 2 — börjar på m3',3:'Grepp 3 — börjar på kvart (4)',4:'Grepp 4 — börjar på kvint (5)',5:'Grepp 5 — börjar på m7',all:'Alla grepp'},
+  moll:{1:'Grepp 1 — rotnoten på E- och D-strängen',2:'Grepp 2 — börjar på m3',3:'Grepp 3 — börjar på kvart (4)',4:'Grepp 4 — börjar på kvint (5)',5:'Grepp 5 — börjar på m7',all:'Alla grepp'},
   dur: {1:'Grepp 1 — rotnoten på E-strängarna',2:'Grepp 2 — börjar på 2an',3:'Grepp 3 — börjar på ters (3)',4:'Grepp 4 — börjar på kvint (5)',5:'Grepp 5 — börjar på sext (6)',all:'Alla grepp'}
 };
 var curGrepp=1, curKey=0, curPentaMode='moll';
@@ -457,59 +449,6 @@ renderModal();
 
 // ── PWA service worker ─────────────────────────────────────────
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
-
-// ── EmailJS påminnelse ─────────────────────────────────────────
-emailjs.init('fX5GM88LRQwx-BYPX');
-
-var emailTimer = null;
-var EMAIL_KEY  = 'guitarEmailReminder';
-
-function updateReminderBtn() {
-  var on  = localStorage.getItem(EMAIL_KEY) === '1';
-  var btn = document.getElementById('reminder-btn');
-  btn.className = 'reminder-btn' + (on ? ' on' : '');
-  btn.textContent = on ? '📧 Aktiv 16:30' : '📧 Påminn 16:30';
-}
-
-function scheduleEmail() {
-  if (emailTimer) clearTimeout(emailTimer);
-  var now  = new Date();
-  var next = new Date();
-  next.setHours(16, 30, 0, 0);
-  if (now >= next) next.setDate(next.getDate() + 1);
-  var ms = next - now;
-  emailTimer = setTimeout(function() {
-    sendReminderEmail();
-    setTimeout(function() {
-      if (localStorage.getItem(EMAIL_KEY) === '1') scheduleEmail();
-    }, 2000);
-  }, ms);
-}
-
-function sendReminderEmail() {
-  var t = document.getElementById('reminder-time').value;
-  emailjs.send('service_ks0fkff', 'template_6s8rorp', {
-    time:    t,
-    message: 'Dags att öva gitarr! Öppna appen och kör igenom ett par grepp.'
-  });
-}
-
-function toggleEmailReminder() {
-  var on = localStorage.getItem(EMAIL_KEY) === '1';
-  if (on) {
-    localStorage.setItem(EMAIL_KEY, '0');
-    if (emailTimer) clearTimeout(emailTimer);
-    emailTimer = null;
-  } else {
-    localStorage.setItem(EMAIL_KEY, '1');
-    scheduleEmail();
-  }
-  updateReminderBtn();
-}
-
-// Återställ och starta om aktiv påminnelse vid sidladdning
-updateReminderBtn();
-if (localStorage.getItem(EMAIL_KEY) === '1') scheduleEmail();
 
 // ── Inloggning ─────────────────────────────────────────────────
 function checkLogin() {
