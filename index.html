@@ -49,11 +49,40 @@ select:hover { border-color: #555; }
 
 /* Legend */
 .legend { display: flex; gap: 14px; margin-top: 8px; font-size: 12px; color: #555; align-items: center; }
+
+/* Login overlay */
+#login-overlay {
+  position: fixed; inset: 0; background: #111;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 9999; gap: 12px;
+}
+#login-overlay h2 { color: #888; font-size: 14px; font-weight: 400; letter-spacing: 1px; margin-bottom: 8px; }
+#login-overlay input {
+  background: #1a1a1a; color: #ccc; border: 1px solid #333; border-radius: 6px;
+  padding: 8px 14px; font-size: 13px; outline: none; width: 220px; text-align: center;
+}
+#login-overlay input:focus { border-color: #555; }
+#login-overlay button {
+  padding: 7px 24px; border-radius: 20px; border: 1px solid rgba(240,168,48,0.4);
+  background: rgba(240,168,48,0.08); color: #f0a830; font-size: 12px; cursor: pointer;
+  transition: all 0.15s; margin-top: 4px;
+}
+#login-overlay button:hover { background: rgba(240,168,48,0.15); }
+#login-error { font-size: 12px; color: #c0392b; min-height: 16px; }
 .ld { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 4px; vertical-align: middle; }
 </style>
 </head>
 <body>
 
+<div id="login-overlay">
+  <h2>GITARRVERKTYG</h2>
+  <input type="text"     id="login-user" placeholder="Användare" autocomplete="off">
+  <input type="password" id="login-pass" placeholder="Lösenord"  autocomplete="off">
+  <button onclick="checkLogin()">Logga in</button>
+  <div id="login-error"></div>
+</div>
+
+<div id="app" style="display:none">
 <div class="tab-bar">
   <button class="tab active" id="tab-penta" onclick="switchTab('penta')">Pentatonisk</button>
   <button class="tab" id="tab-modal" onclick="switchTab('modal')">Modal</button>
@@ -214,6 +243,7 @@ select:hover { border-color: #555; }
     <span><span class="ld" style="background:#4a90d9"></span>Skalton</span>
   </div>
 </div>
+</div><!-- #app -->
 
 <script>
 var ns='http://www.w3.org/2000/svg';
@@ -480,6 +510,33 @@ function toggleEmailReminder() {
 // Återställ och starta om aktiv påminnelse vid sidladdning
 updateReminderBtn();
 if (localStorage.getItem(EMAIL_KEY) === '1') scheduleEmail();
+
+// ── Inloggning ─────────────────────────────────────────────────
+function checkLogin() {
+  var user = document.getElementById('login-user').value.trim();
+  var pass = document.getElementById('login-pass').value;
+  if (user === 'Dani' && pass === 'Daniärbäst') {
+    sessionStorage.setItem('auth', '1');
+    document.getElementById('login-overlay').style.display = 'none';
+    document.getElementById('app').style.display = '';
+  } else {
+    document.getElementById('login-error').textContent = 'Fel användare eller lösenord.';
+  }
+}
+
+// Tillåt Enter-tangenten
+document.getElementById('login-pass').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') checkLogin();
+});
+document.getElementById('login-user').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') document.getElementById('login-pass').focus();
+});
+
+// Redan inloggad i samma session?
+if (sessionStorage.getItem('auth') === '1') {
+  document.getElementById('login-overlay').style.display = 'none';
+  document.getElementById('app').style.display = '';
+}
 </script>
 </body>
 </html>
