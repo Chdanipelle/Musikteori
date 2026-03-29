@@ -65,6 +65,37 @@ select:hover { border-color: #555; }
 #login-overlay button:hover { background: rgba(240,168,48,0.15); }
 #login-error { font-size: 12px; color: #c0392b; min-height: 16px; }
 .ld { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 4px; vertical-align: middle; }
+
+/* Kvintcirkel */
+.cof-svg { display: block; width: 100%; max-width: 340px; margin: 0 auto; }
+.cof-info { max-width: 340px; margin: 12px auto 0; }
+.cof-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #1a1a1a; font-size: 12px; }
+.cof-lbl { color: #444; }
+.cof-val { color: #ccc; font-weight: 600; }
+.cof-chords { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+.cof-ch { background: #1a1a1a; border: 1px solid #252525; border-radius: 5px; padding: 3px 9px; font-size: 12px; color: #777; }
+
+/* Ackordföljder */
+.a-section-lbl { font-size: 11px; color: #444; margin-bottom: 7px; text-transform: uppercase; letter-spacing: 0.5px; }
+.a-chords-row { display: flex; gap: 5px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 2px; }
+.a-card { flex: 1; min-width: 68px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; padding: 9px 4px 7px; text-align: center; transition: all 0.15s; }
+.a-card.hl { background: rgba(240,168,48,0.1); border-color: rgba(240,168,48,0.45); }
+.a-roman { font-size: 11px; color: #555; margin-bottom: 2px; }
+.a-cname { font-size: 15px; font-weight: 700; color: #ccc; margin-bottom: 3px; }
+.a-cnotes { font-size: 9px; color: #3a3a3a; letter-spacing: 0.2px; }
+.a-card.hl .a-roman { color: rgba(240,168,48,0.65); }
+.a-card.hl .a-cname { color: #f0a830; }
+.a-card.hl .a-cnotes { color: rgba(240,168,48,0.4); }
+.a-seq { display: inline-block; width: 13px; height: 13px; border-radius: 50%; background: rgba(240,168,48,0.85); color: #1a0e00; font-size: 8px; font-weight: 700; line-height: 13px; margin: 3px 1px 0; }
+.a-progs { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 16px; }
+.a-prog-btn { padding: 5px 11px; border-radius: 20px; border: 1px solid #2a2a2a; background: transparent; color: #555; font-size: 11px; cursor: pointer; transition: all 0.15s; }
+.a-prog-btn:hover { color: #999; border-color: #444; }
+.a-prog-btn.active { background: rgba(240,168,48,0.1); border-color: rgba(240,168,48,0.45); color: #f0a830; }
+.a-display { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; min-height: 54px; padding: 6px 0 4px; border-top: 1px solid #1e1e1e; }
+.a-display-chord { text-align: center; min-width: 38px; }
+.a-display-num { font-size: 10px; color: #666; }
+.a-display-name { font-size: 22px; font-weight: 700; color: #eee; }
+.a-arrow { font-size: 13px; color: #2e2e2e; align-self: center; }
 </style>
 </head>
 <body>
@@ -82,6 +113,8 @@ select:hover { border-color: #555; }
   <button class="tab active" id="tab-penta" onclick="switchTab('penta')">Pentatonisk</button>
   <button class="tab" id="tab-modal" onclick="switchTab('modal')">Modal</button>
   <button class="tab" id="tab-hals" onclick="switchTab('hals')">Hals</button>
+  <button class="tab" id="tab-ackord" onclick="switchTab('ackord')">Ackordföljder</button>
+  <button class="tab" id="tab-cof" onclick="switchTab('cof')">Kvintcirkel</button>
 </div>
 
 <!-- ═══ PENTATONISK ═══ -->
@@ -305,6 +338,34 @@ select:hover { border-color: #555; }
     <span><span class="ld" style="background:#222; border:1px solid rgba(255,255,255,0.2)"></span>Övriga toner</span>
   </div>
 </div>
+
+<!-- ═══ ACKORDFÖLJDER ═══ -->
+<div id="panel-ackord" style="display:none">
+  <div class="controls">
+    <select id="a-key">
+      <option value="0">A</option><option value="1">Bb</option><option value="2">B</option>
+      <option value="3">C</option><option value="4">C#</option><option value="5">D</option>
+      <option value="6">Eb</option><option value="7">E</option><option value="8">F</option>
+      <option value="9">F#</option><option value="10">G</option><option value="11">G#</option>
+    </select>
+    <select id="a-mode">
+      <option value="dur">Dur</option>
+      <option value="moll">Moll</option>
+    </select>
+    <button id="a-7btn" class="btn" onclick="toggle7ths()">7-ackord</button>
+  </div>
+  <div class="a-section-lbl">Diatoniska ackord</div>
+  <div class="a-chords-row" id="a-chords-row"></div>
+  <div class="a-section-lbl">Vanliga följder</div>
+  <div class="a-progs" id="a-prog-row"></div>
+  <div class="a-display" id="a-prog-display"></div>
+</div>
+
+<!-- ═══ KVINTCIRKEL ═══ -->
+<div id="panel-cof" style="display:none">
+  <svg class="cof-svg" viewBox="0 0 320 320"><g id="cof-g"></g></svg>
+  <div class="cof-info" id="cof-info"><p style="color:#333;font-size:12px;text-align:center;margin-top:6px">Tryck på en tonart</p></div>
+</div>
 </div><!-- #app -->
 
 <script>
@@ -508,14 +569,210 @@ document.getElementById('m-mode').addEventListener('change',function(){
   curModalMode=this.value; curModalGrepp='all'; renderModal();
 });
 
+// ── Ackordföljder ──────────────────────────────────────────────
+var scaleIvs={dur:[0,2,4,5,7,9,11],moll:[0,2,3,5,7,8,10]};
+var triadQ={dur:['maj','min','min','maj','maj','min','dim'],moll:['min','dim','maj','min','min','maj','maj']};
+var seventh_sfx={dur:['maj7','m7','m7','maj7','7','m7','m7b5'],moll:['m7','m7b5','maj7','m7','m7','maj7','7']};
+var romanNum={dur:['I','ii','iii','IV','V','vi','vii°'],moll:['i','ii°','III','iv','v','VI','VII']};
+var ackordProgs={
+  dur:[
+    {name:'I – IV – V',        deg:[0,3,4]},
+    {name:'I – V – vi – IV',   deg:[0,4,5,3]},
+    {name:'I – vi – IV – V',   deg:[0,5,3,4]},
+    {name:'I – ii – V – I',    deg:[0,1,4,0]},
+    {name:'ii – V – I',        deg:[1,4,0]},
+    {name:'I – iii – IV – V',  deg:[0,2,3,4]},
+    {name:'I – IV – ii – V',   deg:[0,3,1,4]},
+    {name:'I – IV – V – IV',   deg:[0,3,4,3]},
+    {name:'I – vi – ii – V',   deg:[0,5,1,4]},
+    {name:'I – I – IV – V',    deg:[0,0,3,4]},
+  ],
+  moll:[
+    {name:'i – iv – v',          deg:[0,3,4]},
+    {name:'i – VI – III – VII',  deg:[0,5,2,6]},
+    {name:'i – iv – VII – III',  deg:[0,3,6,2]},
+    {name:'i – VII – VI – VII',  deg:[0,6,5,6]},
+    {name:'ii° – V – i',         deg:[1,4,0]},
+    {name:'i – VI – VII – i',    deg:[0,5,6,0]},
+    {name:'i – III – VII – IV',  deg:[0,2,6,3]},
+    {name:'i – iv – i – v',      deg:[0,3,0,4]},
+    {name:'i – VI – III – iv',   deg:[0,5,2,3]},
+    {name:'i – VII – iv – v',    deg:[0,6,3,4]},
+  ]
+};
+var curAkKey=0, curAkMode='dur', curAkProg=null, curAk7=false;
+
+function akChordName(d,mode,rs){
+  var root=chromatic[(rs+scaleIvs[mode][d])%12];
+  var q=triadQ[mode][d];
+  if(curAk7) return root+seventh_sfx[mode][d];
+  return root+(q==='maj'?'':q==='min'?'m':'°');
+}
+function akChordNotes(d,mode,rs){
+  var ivs=scaleIvs[mode];
+  var notes=[chromatic[(rs+ivs[d])%12],chromatic[(rs+ivs[(d+2)%7])%12],chromatic[(rs+ivs[(d+4)%7])%12]];
+  if(curAk7) notes.push(chromatic[(rs+ivs[(d+6)%7])%12]);
+  return notes;
+}
+function renderAckord(){
+  var rs=rootSemitones[curAkKey];
+  var mode=curAkMode;
+  var rn=romanNum[mode];
+  var progs=ackordProgs[mode];
+  var hlSeq={};
+  if(curAkProg!==null) progs[curAkProg].deg.forEach(function(d,i){if(!hlSeq[d])hlSeq[d]=[];hlSeq[d].push(i+1);});
+
+  var row=document.getElementById('a-chords-row');
+  row.innerHTML='';
+  for(var d=0;d<7;d++){
+    var name=akChordName(d,mode,rs);
+    var notes=akChordNotes(d,mode,rs);
+    var hl=!!hlSeq[d];
+    var card=document.createElement('div');
+    card.className='a-card'+(hl?' hl':'');
+    var seqHtml='';
+    if(hlSeq[d])hlSeq[d].forEach(function(n){seqHtml+='<span class="a-seq">'+n+'</span>';});
+    card.innerHTML='<div class="a-roman">'+rn[d]+'</div><div class="a-cname">'+name+'</div><div class="a-cnotes">'+notes.join(' · ')+'</div>'+(seqHtml?'<div>'+seqHtml+'</div>':'');
+    row.appendChild(card);
+  }
+
+  var pbrow=document.getElementById('a-prog-row');
+  pbrow.innerHTML='';
+  progs.forEach(function(p,i){
+    var b=document.createElement('button');
+    b.className='a-prog-btn'+(curAkProg===i?' active':'');
+    b.textContent=p.name;
+    b.onclick=(function(idx){return function(){curAkProg=(curAkProg===idx?null:idx);renderAckord();};})(i);
+    pbrow.appendChild(b);
+  });
+
+  var disp=document.getElementById('a-prog-display');
+  disp.innerHTML='';
+  if(curAkProg!==null){
+    progs[curAkProg].deg.forEach(function(d,i){
+      if(i>0){var arr=document.createElement('span');arr.className='a-arrow';arr.textContent='→';disp.appendChild(arr);}
+      var ch=document.createElement('div');
+      ch.className='a-display-chord';
+      ch.innerHTML='<div class="a-display-num">'+rn[d]+'</div><div class="a-display-name">'+akChordName(d,mode,rs)+'</div>';
+      disp.appendChild(ch);
+    });
+  }
+}
+function toggle7ths(){
+  curAk7=!curAk7;
+  document.getElementById('a-7btn').className='btn'+(curAk7?' active':'');
+  renderAckord();
+}
+document.getElementById('a-key').addEventListener('change',function(){curAkKey=parseInt(this.value);renderAckord();});
+document.getElementById('a-mode').addEventListener('change',function(){curAkMode=this.value;curAkProg=null;renderAckord();});
+
+// ── Kvintcirkel ────────────────────────────────────────────────
+var cofMajN=['C','G','D','A','E','B','F#','Db','Ab','Eb','Bb','F'];
+var cofMinN=['Am','Em','Bm','F#m','C#m','G#m','D#m','Bbm','Fm','Cm','Gm','Dm'];
+var cofSemi=[0,7,2,9,4,11,6,1,8,3,10,5];
+var cofMinSemi=cofSemi.map(function(s){return (s+9)%12;});
+var cofAcc=['0','1♯','2♯','3♯','4♯','5♯','6♯','5♭','4♭','3♭','2♭','1♭'];
+var curCof=null; // {pos, type:'maj'|'min'}
+
+function renderCof(){
+  var g=document.getElementById('cof-g');
+  while(g.firstChild)g.removeChild(g.firstChild);
+  var cx=160,cy=160, R1=90,R2=145, ri=50,ro=90;
+
+  function pol(r,deg){var rad=deg*Math.PI/180;return [cx+r*Math.cos(rad),cy+r*Math.sin(rad)];}
+  function arc(r1,r2,a1,a2){
+    var s1=pol(r1,a1),s2=pol(r2,a1),e1=pol(r2,a2),e2=pol(r1,a2),la=(a2-a1>180)?1:0;
+    return 'M'+s1[0]+','+s1[1]+' L'+s2[0]+','+s2[1]+' A'+r2+','+r2+' 0 '+la+',1 '+e1[0]+','+e1[1]+' L'+e2[0]+','+e2[1]+' A'+r1+','+r1+' 0 '+la+',0 '+s1[0]+','+s1[1]+' Z';
+  }
+  function mk(tag){return document.createElementNS(ns,tag);}
+  function txt(x,y,size,fill,weight,content){
+    var t=mk('text');
+    t.setAttribute('x',x);t.setAttribute('y',y);t.setAttribute('text-anchor','middle');
+    t.setAttribute('dominant-baseline','central');t.setAttribute('font-size',size);
+    t.setAttribute('fill',fill);t.setAttribute('font-weight',weight||'400');
+    t.setAttribute('pointer-events','none');t.textContent=content;return t;
+  }
+
+  var sp=curCof?curCof.pos:-1, st=curCof?curCof.type:null;
+
+  for(var i=0;i<12;i++){
+    var ang=-90+i*30, a1=ang-13.5, a2=ang+13.5;
+    var samePos=(i===sp), neighborPos=(sp>=0&&(((i-sp+12)%12===1)||((sp-i+12)%12===1)));
+
+    // --- major segment ---
+    var mfill,mtxt;
+    if(samePos&&st==='maj'){mfill='#f0a830';mtxt='#1a0e00';}
+    else if(samePos&&st==='min'){mfill='rgba(240,168,48,0.18)';mtxt='#f0a830';}
+    else if(neighborPos){mfill='#242424';mtxt='#999';}
+    else{mfill='#1a1a1a';mtxt='#555';}
+
+    var mp=mk('path');
+    mp.setAttribute('d',arc(R1,R2,a1,a2));
+    mp.setAttribute('fill',mfill);mp.setAttribute('stroke','#0d0d0d');mp.setAttribute('stroke-width','1.5');mp.setAttribute('cursor','pointer');
+    (function(idx){mp.addEventListener('click',function(){curCof=(curCof&&curCof.pos===idx&&curCof.type==='maj')?null:{pos:idx,type:'maj'};renderCof();});})(i);
+    g.appendChild(mp);
+    var mlp=pol((R1+R2)/2,ang);
+    g.appendChild(txt(mlp[0],mlp[1],cofMajN[i].length>2?9:11,mtxt,'700',cofMajN[i]));
+
+    // --- minor segment ---
+    var nfill,ntxt;
+    if(samePos&&st==='min'){nfill='#f0a830';ntxt='#1a0e00';}
+    else if(samePos&&st==='maj'){nfill='rgba(240,168,48,0.18)';ntxt='#f0a830';}
+    else if(neighborPos){nfill='#1e1e1e';ntxt='#777';}
+    else{nfill='#141414';ntxt='#3a3a3a';}
+
+    var np=mk('path');
+    np.setAttribute('d',arc(ri,ro,a1,a2));
+    np.setAttribute('fill',nfill);np.setAttribute('stroke','#0d0d0d');np.setAttribute('stroke-width','1.5');np.setAttribute('cursor','pointer');
+    (function(idx){np.addEventListener('click',function(){curCof=(curCof&&curCof.pos===idx&&curCof.type==='min')?null:{pos:idx,type:'min'};renderCof();});})(i);
+    g.appendChild(np);
+    var nlp=pol((ri+ro)/2,ang);
+    g.appendChild(txt(nlp[0],nlp[1],8,ntxt,'500',cofMinN[i]));
+  }
+
+  // center
+  var cc=mk('circle');cc.setAttribute('cx',cx);cc.setAttribute('cy',cy);cc.setAttribute('r','48');cc.setAttribute('fill','#111');cc.setAttribute('stroke','#222');cc.setAttribute('stroke-width','1');g.appendChild(cc);
+  if(curCof){
+    var nm=st==='maj'?cofMajN[sp]:cofMinN[sp];
+    var acc=cofAcc[sp];
+    g.appendChild(txt(cx,cy-10,nm.length>2?14:18,'#eee','700',nm));
+    g.appendChild(txt(cx,cy+8,9,'#555','400',st==='maj'?'dur':'moll'));
+    g.appendChild(txt(cx,cy+20,8,'#3a3a3a','400',acc+(acc==='0'?' förtecken':acc.slice(-1)==='♯'?' korstecken':' b-tecken')));
+  } else {
+    g.appendChild(txt(cx,cy,20,'#2a2a2a','700','♩'));
+  }
+
+  // info panel
+  var panel=document.getElementById('cof-info');
+  if(!curCof){panel.innerHTML='<p style="color:#333;font-size:12px;text-align:center;margin-top:6px">Tryck på en tonart</p>';return;}
+  var pos=curCof.pos, type=curCof.type;
+  var relName=type==='maj'?cofMinN[pos]:cofMajN[pos];
+  var domPos=(pos+1)%12, subPos=(pos+11)%12;
+  var domName=type==='maj'?cofMajN[domPos]:cofMinN[domPos];
+  var subName=type==='maj'?cofMajN[subPos]:cofMinN[subPos];
+  var mode=type==='maj'?'dur':'moll';
+  var keySemi=type==='maj'?cofSemi[pos]:cofMinSemi[pos];
+  var ivs=scaleIvs[mode], triad=triadQ[mode], rn=romanNum[mode];
+  var chHtml='';
+  for(var d=0;d<7;d++){
+    var root=chromatic[(keySemi+ivs[d])%12];
+    var q=triad[d];
+    chHtml+='<span class="cof-ch">'+rn[d]+' '+root+(q==='maj'?'':q==='min'?'m':'°')+'</span>';
+  }
+  panel.innerHTML=
+    '<div class="cof-row"><span class="cof-lbl">Relativ</span><span class="cof-val">'+relName+'</span></div>'+
+    '<div class="cof-row"><span class="cof-lbl">Dominant (V)</span><span class="cof-val">'+domName+'</span></div>'+
+    '<div class="cof-row"><span class="cof-lbl">Subdominant (IV)</span><span class="cof-val">'+subName+'</span></div>'+
+    '<div class="cof-row"><span class="cof-lbl">Förtecken</span><span class="cof-val">'+cofAcc[pos]+'</span></div>'+
+    '<div class="cof-chords">'+chHtml+'</div>';
+}
+
 // ── Tabbar ─────────────────────────────────────────────────────
 function switchTab(t){
-  document.getElementById('panel-penta').style.display=t==='penta'?'':'none';
-  document.getElementById('panel-modal').style.display=t==='modal'?'':'none';
-  document.getElementById('panel-hals').style.display=t==='hals'?'':'none';
-  document.getElementById('tab-penta').className='tab'+(t==='penta'?' active':'');
-  document.getElementById('tab-modal').className='tab'+(t==='modal'?' active':'');
-  document.getElementById('tab-hals').className='tab'+(t==='hals'?' active':'');
+  ['penta','modal','hals','ackord','cof'].forEach(function(id){
+    document.getElementById('panel-'+id).style.display=t===id?'':'none';
+    document.getElementById('tab-'+id).className='tab'+(t===id?' active':'');
+  });
 }
 
 // ── Hals ───────────────────────────────────────────────────────
@@ -557,6 +814,8 @@ document.getElementById('h-key').addEventListener('change',function(){
 render(); selectG(1);
 renderModal();
 renderHals();
+renderAckord();
+renderCof();
 
 // ── PWA service worker ─────────────────────────────────────────
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
