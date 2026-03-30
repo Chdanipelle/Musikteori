@@ -432,6 +432,7 @@ body.light .fb-wrap { background: #1c1c1c; border-radius: 8px; padding: 10px; ma
   <div class="a-section-lbl">Vanliga följder</div>
   <div class="a-progs" id="a-prog-row"></div>
   <div class="a-display" id="a-prog-display"></div>
+  <div class="gl-diagrams" id="a-prog-diagrams" style="margin-top:14px"></div>
   <div style="margin-top:18px;padding-top:14px;border-top:1px solid #1a1a1a">
     <div class="a-section-lbl">Karaktär</div>
     <div class="a-progs" id="a-mood-row"></div>
@@ -737,14 +738,45 @@ function renderAckord(){
   });
 
   var disp=document.getElementById('a-prog-display');
-  disp.innerHTML='';
+  var diagDiv=document.getElementById('a-prog-diagrams');
+  disp.innerHTML=''; diagDiv.innerHTML='';
   if(curAkProg!==null){
+    var typeMap=[
+      ['m7b5','m7b5'],['maj7','maj7'],['add9','add9'],['sus2','sus2'],['sus4','sus4'],
+      ['aug','aug'],['dim','dim'],['m7','m7'],['7','7'],['m','min'],['°','dim']
+    ];
     progs[curAkProg].deg.forEach(function(d,i){
       if(i>0){var arr=document.createElement('span');arr.className='a-arrow';arr.textContent='→';disp.appendChild(arr);}
       var ch=document.createElement('div');
       ch.className='a-display-chord';
-      ch.innerHTML='<div class="a-display-num">'+rn[d]+'</div><div class="a-display-name">'+akChordName(d,mode,rs)+'</div>';
+      var cname=akChordName(d,mode,rs);
+      ch.innerHTML='<div class="a-display-num">'+rn[d]+'</div><div class="a-display-name">'+cname+'</div>';
       disp.appendChild(ch);
+
+      var rootIdx=-1, chType='maj';
+      for(var ki=0;ki<keyNames.length;ki++){
+        if(cname.indexOf(keyNames[ki])===0){
+          rootIdx=ki;
+          var sfx=cname.slice(keyNames[ki].length);
+          chType='maj';
+          for(var ti=0;ti<typeMap.length;ti++){
+            if(sfx===typeMap[ti][0]){chType=typeMap[ti][1];break;}
+          }
+          break;
+        }
+      }
+      if(rootIdx<0||!glTemplates[chType]) return;
+      var vs=glVoicings(rootIdx,chType);
+      if(!vs.length) return;
+      var wrap=document.createElement('div');
+      wrap.className='gl-diagram';
+      var prevRoot=curGlRoot; curGlRoot=rootIdx;
+      wrap.appendChild(glDraw(vs[0].frets));
+      curGlRoot=prevRoot;
+      var lbl=document.createElement('div');
+      lbl.className='gl-diagram-lbl'; lbl.textContent=cname;
+      wrap.appendChild(lbl);
+      diagDiv.appendChild(wrap);
     });
   }
 }
