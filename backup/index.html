@@ -134,8 +134,8 @@ body.light .fb-wrap { background: #1c1c1c; border-radius: 8px; padding: 10px; ma
 .gl-diagram-lbl { font-size: 10px; color: var(--muted2); margin-top: 4px; }
 
 /* Kvintcirkel */
-.cof-svg { display: block; width: 100%; max-width: 340px; margin: 0 auto; }
-.cof-info { max-width: 340px; margin: 12px auto 0; }
+.cof-svg { display: block; width: 100%; max-width: 340px; margin: 0; }
+.cof-info { max-width: 340px; margin: 12px 0 0; }
 .cof-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
 .cof-lbl { color: var(--muted2); }
 .cof-val { color: var(--text2); font-weight: 600; }
@@ -437,6 +437,7 @@ body.light .fb-wrap { background: #1c1c1c; border-radius: 8px; padding: 10px; ma
     <div class="a-progs" id="a-mood-row"></div>
     <div class="a-mood-hint" id="a-mood-hint"></div>
     <div class="a-display" id="a-mood-display" style="min-height:0;padding-top:0;border-top:none"></div>
+    <div class="gl-diagrams" id="a-mood-diagrams" style="margin-top:14px"></div>
   </div>
 </div>
 
@@ -1182,7 +1183,8 @@ function renderMood(){
   });
   var hint=document.getElementById('a-mood-hint');
   var disp=document.getElementById('a-mood-display');
-  disp.innerHTML='';
+  var diagDiv=document.getElementById('a-mood-diagrams');
+  disp.innerHTML=''; diagDiv.innerHTML='';
   if(!curMood||curAkProg===null){
     hint.textContent=curMood&&curAkProg===null?'Välj en följd ovan för att se omvandlingen':'';
     return;
@@ -1192,12 +1194,43 @@ function renderMood(){
   var mode=curAkMode;
   var progs=ackordProgs[mode];
   var rn=romanNum[mode];
+  var diagDiv=document.getElementById('a-mood-diagrams');
+  diagDiv.innerHTML='';
   progs[curAkProg].deg.forEach(function(d,i){
     if(i>0){var a=document.createElement('span');a.className='a-arrow';a.textContent='→';disp.appendChild(a);}
+    var moodName=moodDefs[curMood].tfm(d,mode,rs);
     var ch=document.createElement('div');
     ch.className='a-display-chord';
-    ch.innerHTML='<div class="a-display-num">'+rn[d]+'</div><div class="a-display-name" style="font-size:18px">'+moodDefs[curMood].tfm(d,mode,rs)+'</div>';
+    ch.innerHTML='<div class="a-display-num">'+rn[d]+'</div><div class="a-display-name" style="font-size:18px">'+moodName+'</div>';
     disp.appendChild(ch);
+
+    // Parse root + type from chord name to generate diagram
+    var rootIdx=-1, chType='maj';
+    var typeMap=[
+      ['m7b5','m7b5'],['maj7','maj7'],['add9','add9'],['sus2','sus2'],['sus4','sus4'],
+      ['aug','aug'],['dim','dim'],['m11','m7'],['°7','dim'],['m7','m7'],['7','7'],['m','min'],['°','dim']
+    ];
+    for(var ki=0;ki<keyNames.length;ki++){
+      if(moodName.indexOf(keyNames[ki])===0){
+        rootIdx=ki;
+        var sfx=moodName.slice(keyNames[ki].length);
+        chType='maj';
+        for(var ti=0;ti<typeMap.length;ti++){
+          if(sfx===typeMap[ti][0]){chType=typeMap[ti][1];break;}
+        }
+        break;
+      }
+    }
+    if(rootIdx<0||!glTemplates[chType]) return;
+    var vs=glVoicings(rootIdx,chType);
+    if(!vs.length) return;
+    var wrap=document.createElement('div');
+    wrap.className='gl-diagram';
+    wrap.appendChild(glDraw(vs[0].frets));
+    var lbl=document.createElement('div');
+    lbl.className='gl-diagram-lbl';lbl.textContent=moodName;
+    wrap.appendChild(lbl);
+    diagDiv.appendChild(wrap);
   });
 }
 
