@@ -66,6 +66,17 @@ select:hover { border-color: #555; }
 #login-error { font-size: 12px; color: #c0392b; min-height: 16px; }
 .ld { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 4px; vertical-align: middle; }
 
+/* Ackordlexikon */
+.gl-root-row { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+.gl-root-btn { min-width: 36px; padding: 5px 7px; border-radius: 6px; border: 1px solid #2a2a2a; background: transparent; color: #555; font-size: 12px; cursor: pointer; text-align: center; transition: all 0.15s; }
+.gl-root-btn:hover { color: #aaa; border-color: #444; }
+.gl-root-btn.active { background: rgba(240,168,48,0.12); border-color: rgba(240,168,48,0.5); color: #f0a830; }
+.gl-type-row { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 14px; }
+.gl-chord-title { font-size: 20px; font-weight: 700; color: #ccc; margin-bottom: 12px; min-height: 28px; }
+.gl-diagrams { display: flex; flex-wrap: wrap; gap: 16px; }
+.gl-diagram { text-align: center; }
+.gl-diagram-lbl { font-size: 10px; color: #444; margin-top: 4px; }
+
 /* Kvintcirkel */
 .cof-svg { display: block; width: 100%; max-width: 340px; margin: 0 auto; }
 .cof-info { max-width: 340px; margin: 12px auto 0; }
@@ -114,6 +125,7 @@ select:hover { border-color: #555; }
   <button class="tab" id="tab-modal" onclick="switchTab('modal')">Modal</button>
   <button class="tab" id="tab-hals" onclick="switchTab('hals')">Hals</button>
   <button class="tab" id="tab-ackord" onclick="switchTab('ackord')">Ackordföljder</button>
+  <button class="tab" id="tab-grepp" onclick="switchTab('grepp')">Ackordgrepp</button>
   <button class="tab" id="tab-cof" onclick="switchTab('cof')">Kvintcirkel</button>
 </div>
 
