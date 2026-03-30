@@ -66,6 +66,17 @@ select:hover { border-color: #555; }
 #login-error { font-size: 12px; color: #c0392b; min-height: 16px; }
 .ld { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 4px; vertical-align: middle; }
 
+/* Ackordlexikon */
+.gl-root-row { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+.gl-root-btn { min-width: 36px; padding: 5px 7px; border-radius: 6px; border: 1px solid #2a2a2a; background: transparent; color: #555; font-size: 12px; cursor: pointer; text-align: center; transition: all 0.15s; }
+.gl-root-btn:hover { color: #aaa; border-color: #444; }
+.gl-root-btn.active { background: rgba(240,168,48,0.12); border-color: rgba(240,168,48,0.5); color: #f0a830; }
+.gl-type-row { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 14px; }
+.gl-chord-title { font-size: 20px; font-weight: 700; color: #ccc; margin-bottom: 12px; min-height: 28px; }
+.gl-diagrams { display: flex; flex-wrap: wrap; gap: 16px; }
+.gl-diagram { text-align: center; }
+.gl-diagram-lbl { font-size: 10px; color: #444; margin-top: 4px; }
+
 /* Kvintcirkel */
 .cof-svg { display: block; width: 100%; max-width: 340px; margin: 0 auto; }
 .cof-info { max-width: 340px; margin: 12px auto 0; }
@@ -114,6 +125,7 @@ select:hover { border-color: #555; }
   <button class="tab" id="tab-modal" onclick="switchTab('modal')">Modal</button>
   <button class="tab" id="tab-hals" onclick="switchTab('hals')">Hals</button>
   <button class="tab" id="tab-ackord" onclick="switchTab('ackord')">Ackordföljder</button>
+  <button class="tab" id="tab-grepp" onclick="switchTab('grepp')">Ackordgrepp</button>
   <button class="tab" id="tab-cof" onclick="switchTab('cof')">Kvintcirkel</button>
 </div>
 
@@ -359,6 +371,14 @@ select:hover { border-color: #555; }
   <div class="a-section-lbl">Vanliga följder</div>
   <div class="a-progs" id="a-prog-row"></div>
   <div class="a-display" id="a-prog-display"></div>
+</div>
+
+<!-- ═══ ACKORDGREPP ═══ -->
+<div id="panel-grepp" style="display:none">
+  <div class="gl-root-row" id="gl-root"></div>
+  <div class="gl-type-row" id="gl-type"></div>
+  <div class="gl-chord-title" id="gl-title"></div>
+  <div class="gl-diagrams" id="gl-diagrams"></div>
 </div>
 
 <!-- ═══ KVINTCIRKEL ═══ -->
@@ -666,6 +686,184 @@ function toggle7ths(){
 document.getElementById('a-key').addEventListener('change',function(){curAkKey=parseInt(this.value);renderAckord();});
 document.getElementById('a-mode').addEventListener('change',function(){curAkMode=this.value;curAkProg=null;renderAckord();});
 
+// ── Ackordgrepp ────────────────────────────────────────────────
+// Template offsets from root fret. String order: [lowE,A,D,G,B,highE]. -1=muted.
+// E-shape: root on low E string. A-shape: root on A string.
+var glOpenSemi=[4,9,2,7,11,4];
+var glTemplates={
+  maj:  {lbl:'maj',  E:[0,2,2,1,0,0],    A:[-1,0,2,2,2,0]},
+  min:  {lbl:'m',    E:[0,2,2,0,0,0],    A:[-1,0,2,2,1,0]},
+  '7':  {lbl:'7',    E:[0,2,0,1,0,0],    A:[-1,0,2,0,2,0]},
+  maj7: {lbl:'maj7', E:[0,2,1,1,0,0],    A:[-1,0,2,1,2,0]},
+  m7:   {lbl:'m7',   E:[0,2,0,0,0,0],    A:[-1,0,2,0,1,0]},
+  sus2: {lbl:'sus2', E:null,             A:[-1,0,2,2,0,0]},
+  sus4: {lbl:'sus4', E:[0,2,2,2,0,0],    A:[-1,0,2,2,3,0]},
+  dim:  {lbl:'dim',  E:null,             A:[-1,0,1,2,1,-1]},
+  aug:  {lbl:'aug',  E:[0,3,2,1,1,0],    A:[-1,0,3,2,2,1]},
+  add9: {lbl:'add9', E:[0,2,2,1,0,2],    A:[-1,0,2,4,2,0]}
+};
+// Hardcoded open voicings — key = "rootIndex_type"
+// rootIndex: A=0 Bb=1 B=2 C=3 C#=4 D=5 Eb=6 E=7 F=8 F#=9 G=10 G#=11
+var glOpen={
+  '3_maj': [-1,3,2,0,1,0],    // C
+  '5_maj': [-1,-1,0,2,3,2],   // D
+  '10_maj':[3,2,0,0,3,3],     // G
+  '5_min': [-1,-1,0,2,3,1],   // Dm
+  '10_7':  [3,2,0,0,0,1],     // G7
+  '5_7':   [-1,-1,0,2,1,2],   // D7
+  '2_7':   [-1,2,1,2,0,2],    // B7
+  '3_maj7':[-1,3,2,0,0,0],    // Cmaj7
+  '5_sus2':[-1,-1,0,2,3,0],   // Dsus2
+  '5_sus4':[-1,-1,0,2,3,3],   // Dsus4
+  '3_add9':[-1,3,2,0,3,3]     // Cadd9
+};
+
+var curGlRoot=0, curGlType='maj';
+
+function glVoicings(rootIdx,type){
+  var rs=rootSemitones[rootIdx], tmpl=glTemplates[type], v=[];
+  if(tmpl.E){
+    var rf=(rs-4+12)%12;
+    v.push({frets:tmpl.E.map(function(o){return o===-1?-1:rf+o;}),rf:rf});
+  }
+  if(tmpl.A){
+    var rf2=(rs-9+12)%12;
+    var f2=tmpl.A.map(function(o){return o===-1?-1:rf2+o;});
+    if(!v.some(function(x){return x.frets.join()===f2.join();}))
+      v.push({frets:f2,rf:rf2});
+  }
+  var ok=rootIdx+'_'+type;
+  if(glOpen[ok]){
+    var of_=glOpen[ok];
+    if(!v.some(function(x){return x.frets.join()===of_.join();}))
+      v.unshift({frets:of_,rf:-1});
+  }
+  return v;
+}
+
+function glDraw(frets){
+  var rs=rootSemitones[curGlRoot];
+  var pressed=frets.filter(function(f){return f>0;});
+  var minF=pressed.length?Math.min.apply(null,pressed):1;
+  var sf=minF<=3?1:minF; // start fret
+  var hasNut=sf===1;
+  // Barre: 2+ strings at startFret with span ≥ 2
+  var atSF=[]; frets.forEach(function(f,i){if(f===sf)atSF.push(i);});
+  var hasBar=atSF.length>=2&&(atSF[atSF.length-1]-atSF[0])>=2;
+
+  var W=82,H=102;
+  var sx=[10,22,34,46,58,70]; // string x positions
+  var nutY=hasNut?24:0, topY=hasNut?24:20, fh=16;
+
+  var svg=document.createElementNS(ns,'svg');
+  svg.setAttribute('viewBox','0 0 '+W+' '+H);
+  svg.setAttribute('width',W);svg.setAttribute('height',H);
+  function mk(t){return document.createElementNS(ns,t);}
+  function L(x1,y1,x2,y2,s,sw){
+    var l=mk('line');
+    [['x1',x1],['y1',y1],['x2',x2],['y2',y2],['stroke',s],['stroke-width',sw]]
+      .forEach(function(p){l.setAttribute(p[0],p[1]);});
+    return l;
+  }
+
+  // String lines
+  for(var s=0;s<6;s++)
+    svg.appendChild(L(sx[s],14,sx[s],topY+4*fh,'rgba(255,255,255,0.22)',1));
+
+  // Fret lines
+  for(var f=0;f<=4;f++){
+    var fy=topY+f*fh, isNut=(f===0&&hasNut);
+    svg.appendChild(L(sx[0],fy,sx[5],fy,isNut?'rgba(255,255,255,0.5)':'rgba(255,255,255,0.15)',isNut?3.5:1));
+  }
+
+  // Fret label if no nut
+  if(!hasNut){
+    var lt=mk('text');lt.setAttribute('x',W-1);lt.setAttribute('y',topY+fh*0.5);
+    lt.setAttribute('text-anchor','end');lt.setAttribute('dominant-baseline','central');
+    lt.setAttribute('font-size','8');lt.setAttribute('fill','rgba(255,255,255,0.25)');
+    lt.textContent=sf+'fr';svg.appendChild(lt);
+  }
+
+  // Barre bar
+  if(hasBar){
+    var by=topY+0.5*fh;
+    var br=mk('rect');
+    br.setAttribute('x',sx[atSF[0]]-5);br.setAttribute('y',by-5.5);
+    br.setAttribute('width',sx[atSF[atSF.length-1]]-sx[atSF[0]]+10);
+    br.setAttribute('height',11);br.setAttribute('rx',5.5);
+    br.setAttribute('fill','rgba(190,190,190,0.88)');
+    svg.appendChild(br);
+  }
+
+  // Dots and indicators
+  frets.forEach(function(f,si){
+    var x=sx[si];
+    var isRoot=f>=0&&(glOpenSemi[si]+f)%12===rs;
+    if(f===-1){
+      var xt=mk('text');
+      xt.setAttribute('x',x);xt.setAttribute('y',9);
+      xt.setAttribute('text-anchor','middle');xt.setAttribute('dominant-baseline','central');
+      xt.setAttribute('font-size','9');xt.setAttribute('fill','#444');
+      xt.textContent='×';svg.appendChild(xt);
+    } else if(f===0){
+      var oc=mk('circle');
+      oc.setAttribute('cx',x);oc.setAttribute('cy',9);oc.setAttribute('r',4);
+      oc.setAttribute('fill',isRoot?'#f0a830':'none');
+      oc.setAttribute('stroke',isRoot?'#f0a830':'rgba(255,255,255,0.35)');
+      oc.setAttribute('stroke-width','1.5');svg.appendChild(oc);
+    } else {
+      if(f<sf||f>sf+3) return;
+      if(hasBar&&f===sf&&atSF.indexOf(si)!==-1) return;
+      var cy=topY+(f-sf+0.5)*fh;
+      var dc=mk('circle');
+      dc.setAttribute('cx',x);dc.setAttribute('cy',cy);dc.setAttribute('r',6);
+      dc.setAttribute('fill',isRoot?'#f0a830':'rgba(195,195,195,0.88)');
+      svg.appendChild(dc);
+    }
+  });
+  return svg;
+}
+
+function renderGrepp(){
+  var rs=rootSemitones[curGlRoot];
+  // Root buttons
+  var rootRow=document.getElementById('gl-root');
+  rootRow.innerHTML='';
+  keyNames.forEach(function(k,i){
+    var b=document.createElement('button');
+    b.className='gl-root-btn'+(i===curGlRoot?' active':'');
+    b.textContent=k;
+    b.onclick=(function(idx){return function(){curGlRoot=idx;renderGrepp();};})(i);
+    rootRow.appendChild(b);
+  });
+  // Type buttons
+  var typeRow=document.getElementById('gl-type');
+  typeRow.innerHTML='';
+  Object.keys(glTemplates).forEach(function(t){
+    var b=document.createElement('button');
+    b.className='btn'+(t===curGlType?' active':'');
+    b.textContent=glTemplates[t].lbl;
+    b.onclick=(function(tp){return function(){curGlType=tp;renderGrepp();};})(t);
+    typeRow.appendChild(b);
+  });
+  // Title
+  var sfx=glTemplates[curGlType].lbl==='maj'?'':glTemplates[curGlType].lbl;
+  document.getElementById('gl-title').textContent=keyNames[curGlRoot]+sfx;
+  // Diagrams
+  var diag=document.getElementById('gl-diagrams');
+  diag.innerHTML='';
+  glVoicings(curGlRoot,curGlType).forEach(function(v){
+    var lbl=v.rf<0||v.rf===0?'Öppen läge':'Barre fr. '+v.rf;
+    var wrap=document.createElement('div');
+    wrap.className='gl-diagram';
+    wrap.appendChild(glDraw(v.frets));
+    var l=document.createElement('div');
+    l.className='gl-diagram-lbl';l.textContent=lbl;
+    wrap.appendChild(l);
+    diag.appendChild(wrap);
+  });
+}
+
 // ── Kvintcirkel ────────────────────────────────────────────────
 var cofMajN=['C','G','D','A','E','B','F#','Db','Ab','Eb','Bb','F'];
 var cofMinN=['Am','Em','Bm','F#m','C#m','G#m','D#m','Bbm','Fm','Cm','Gm','Dm'];
@@ -769,7 +967,7 @@ function renderCof(){
 
 // ── Tabbar ─────────────────────────────────────────────────────
 function switchTab(t){
-  ['penta','modal','hals','ackord','cof'].forEach(function(id){
+  ['penta','modal','hals','ackord','grepp','cof'].forEach(function(id){
     document.getElementById('panel-'+id).style.display=t===id?'':'none';
     document.getElementById('tab-'+id).className='tab'+(t===id?' active':'');
   });
@@ -815,6 +1013,7 @@ render(); selectG(1);
 renderModal();
 renderHals();
 renderAckord();
+renderGrepp();
 renderCof();
 
 // ── PWA service worker ─────────────────────────────────────────
