@@ -66,6 +66,9 @@ select:hover { border-color: #555; }
 #login-error { font-size: 12px; color: #c0392b; min-height: 16px; }
 .ld { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 4px; vertical-align: middle; }
 
+/* Mood-omvandling */
+.a-mood-hint { font-size:10px; color:#383838; font-style:italic; margin-bottom:8px; min-height:14px; }
+
 /* Ackordlexikon */
 .gl-root-row { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
 .gl-root-btn { min-width: 36px; padding: 5px 7px; border-radius: 6px; border: 1px solid #2a2a2a; background: transparent; color: #555; font-size: 12px; cursor: pointer; text-align: center; transition: all 0.15s; }
@@ -127,6 +130,7 @@ select:hover { border-color: #555; }
   <button class="tab" id="tab-ackord" onclick="switchTab('ackord')">Ackordföljder</button>
   <button class="tab" id="tab-grepp" onclick="switchTab('grepp')">Ackordgrepp</button>
   <button class="tab" id="tab-cof" onclick="switchTab('cof')">Kvintcirkel</button>
+  <button class="btn" id="inst-btn" onclick="toggleInstrument()" style="margin-left:auto;font-size:11px;padding:4px 10px;margin-bottom:1px">Akustisk</button>
 </div>
 
 <!-- ═══ PENTATONISK ═══ -->
@@ -194,6 +198,7 @@ select:hover { border-color: #555; }
     <text x="566" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">12</text>
     <text x="610" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">13</text>
     <text x="654" y="205" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">14</text>
+    <g id="p-extra"></g>
     <g id="dots"></g>
   </svg>
   <div class="legend">
@@ -274,6 +279,7 @@ select:hover { border-color: #555; }
     <text x="516" y="210" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">10</text>
     <text x="564" y="210" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">11</text>
     <text x="612" y="210" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)">12</text>
+    <g id="m-extra"></g>
     <g id="modal-dots"></g>
   </svg>
   <div class="legend">
@@ -343,6 +349,7 @@ select:hover { border-color: #555; }
     <text x="530" y="210" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.2)">10</text>
     <text x="580" y="210" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.2)">11</text>
     <text x="630" y="210" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.2)">12</text>
+    <g id="h-extra"></g>
     <g id="hals-dots"></g>
   </svg>
   <div class="legend">
@@ -371,6 +378,12 @@ select:hover { border-color: #555; }
   <div class="a-section-lbl">Vanliga följder</div>
   <div class="a-progs" id="a-prog-row"></div>
   <div class="a-display" id="a-prog-display"></div>
+  <div style="margin-top:18px;padding-top:14px;border-top:1px solid #1a1a1a">
+    <div class="a-section-lbl">Karaktär</div>
+    <div class="a-progs" id="a-mood-row"></div>
+    <div class="a-mood-hint" id="a-mood-hint"></div>
+    <div class="a-display" id="a-mood-display" style="min-height:0;padding-top:0;border-top:none"></div>
+  </div>
 </div>
 
 <!-- ═══ ACKORDGREPP ═══ -->
@@ -430,12 +443,12 @@ function render(){
     w.style.opacity=(curGrepp==='all'||curGrepp===n)?'1':'0.06';
     w.style.transition='opacity 0.2s';
     gdef.forEach(function(nd){
+      var mxF=maxFretsPenta();
       var f=rf+nd[1];
-      while(f>14)f-=12; while(f<1)f+=12;
-      // keep note in the same octave window as the root fret
+      while(f>mxF)f-=12; while(f<1)f+=12;
       if(f>rf+8)f-=12; if(f<rf-8)f+=12;
-      while(f>14)f-=12; while(f<1)f+=12;
-      if(f<1||f>14)return;
+      while(f>mxF)f-=12; while(f<1)f+=12;
+      if(f<1||f>mxF)return;
       var g=document.createElementNS(ns,'g');
       var ci=document.createElementNS(ns,'circle');
       ci.setAttribute('cx',bxP(f)); ci.setAttribute('cy',sy[nd[0]]); ci.setAttribute('r','11');
@@ -498,7 +511,7 @@ function getModalPositions(){
   mode.ivs.forEach(function(iv){iSet[iv]=mode.lbl[iv];});
   var lowE=openNotes[5]; // E=4
   var pos=[];
-  for(var f=1;f<=12;f++){
+  for(var f=1;f<=maxFretsNeck();f++){
     var note=(lowE+f)%12;
     var iv=(note-rs+12)%12;
     if(iSet[iv]!==undefined) pos.push({fret:f, label:iSet[iv]});
@@ -545,13 +558,15 @@ function renderModal(){
   function inWindow(f){
     if(winStart===null) return true;
     if(f>=winStart && f<=winEnd) return true;
-    // hantera wrap förbi band 12
-    if(winEnd>12 && f<=winEnd-12) return true;
+    // hantera wrap
+    var mxM=maxFretsNeck();
+    if(winEnd>mxM && f<=winEnd-mxM) return true;
     return false;
   }
 
+  var mxFM=maxFretsNeck();
   for(var s=0;s<6;s++){
-    for(var f=1;f<=12;f++){
+    for(var f=1;f<=mxFM;f++){
       if(!inWindow(f)) continue;
       var note=(openNotes[s]+f)%12;
       var iv=(note-rs+12)%12;
@@ -662,7 +677,7 @@ function renderAckord(){
     var b=document.createElement('button');
     b.className='a-prog-btn'+(curAkProg===i?' active':'');
     b.textContent=p.name;
-    b.onclick=(function(idx){return function(){curAkProg=(curAkProg===idx?null:idx);renderAckord();};})(i);
+    b.onclick=(function(idx){return function(){curAkProg=(curAkProg===idx?null:idx);renderAckord();renderMood();};})(i);
     pbrow.appendChild(b);
   });
 
@@ -683,8 +698,8 @@ function toggle7ths(){
   document.getElementById('a-7btn').className='btn'+(curAk7?' active':'');
   renderAckord();
 }
-document.getElementById('a-key').addEventListener('change',function(){curAkKey=parseInt(this.value);renderAckord();});
-document.getElementById('a-mode').addEventListener('change',function(){curAkMode=this.value;curAkProg=null;renderAckord();});
+document.getElementById('a-key').addEventListener('change',function(){curAkKey=parseInt(this.value);renderAckord();renderMood();});
+document.getElementById('a-mode').addEventListener('change',function(){curAkMode=this.value;curAkProg=null;renderAckord();renderMood();});
 
 // ── Ackordgrepp ────────────────────────────────────────────────
 // Template offsets from root fret. String order: [lowE,A,D,G,B,highE]. -1=muted.
@@ -751,9 +766,9 @@ function glDraw(frets){
   var atSF=[]; frets.forEach(function(f,i){if(f===sf)atSF.push(i);});
   var hasBar=atSF.length>=2&&(atSF[atSF.length-1]-atSF[0])>=2;
 
-  var W=82,H=102;
-  var sx=[10,22,34,46,58,70]; // string x positions
-  var nutY=hasNut?24:0, topY=hasNut?24:20, fh=16;
+  var W=112,H=128;
+  var sx=[10,28,46,64,82,100]; // string x positions (18px spacing)
+  var topY=hasNut?26:21, fh=20;
 
   var svg=document.createElementNS(ns,'svg');
   svg.setAttribute('viewBox','0 0 '+W+' '+H);
@@ -788,9 +803,9 @@ function glDraw(frets){
   if(hasBar){
     var by=topY+0.5*fh;
     var br=mk('rect');
-    br.setAttribute('x',sx[atSF[0]]-5);br.setAttribute('y',by-5.5);
-    br.setAttribute('width',sx[atSF[atSF.length-1]]-sx[atSF[0]]+10);
-    br.setAttribute('height',11);br.setAttribute('rx',5.5);
+    br.setAttribute('x',sx[atSF[0]]-6);br.setAttribute('y',by-7);
+    br.setAttribute('width',sx[atSF[atSF.length-1]]-sx[atSF[0]]+12);
+    br.setAttribute('height',14);br.setAttribute('rx',7);
     br.setAttribute('fill','rgba(190,190,190,0.88)');
     svg.appendChild(br);
   }
@@ -803,11 +818,11 @@ function glDraw(frets){
       var xt=mk('text');
       xt.setAttribute('x',x);xt.setAttribute('y',9);
       xt.setAttribute('text-anchor','middle');xt.setAttribute('dominant-baseline','central');
-      xt.setAttribute('font-size','9');xt.setAttribute('fill','#444');
+      xt.setAttribute('font-size','12');xt.setAttribute('fill','#444');
       xt.textContent='×';svg.appendChild(xt);
     } else if(f===0){
       var oc=mk('circle');
-      oc.setAttribute('cx',x);oc.setAttribute('cy',9);oc.setAttribute('r',4);
+      oc.setAttribute('cx',x);oc.setAttribute('cy',9);oc.setAttribute('r',5.5);
       oc.setAttribute('fill',isRoot?'#f0a830':'none');
       oc.setAttribute('stroke',isRoot?'#f0a830':'rgba(255,255,255,0.35)');
       oc.setAttribute('stroke-width','1.5');svg.appendChild(oc);
@@ -816,7 +831,7 @@ function glDraw(frets){
       if(hasBar&&f===sf&&atSF.indexOf(si)!==-1) return;
       var cy=topY+(f-sf+0.5)*fh;
       var dc=mk('circle');
-      dc.setAttribute('cx',x);dc.setAttribute('cy',cy);dc.setAttribute('r',6);
+      dc.setAttribute('cx',x);dc.setAttribute('cy',cy);dc.setAttribute('r',8);
       dc.setAttribute('fill',isRoot?'#f0a830':'rgba(195,195,195,0.88)');
       svg.appendChild(dc);
     }
@@ -965,6 +980,157 @@ function renderCof(){
     '<div class="cof-chords">'+chHtml+'</div>';
 }
 
+// ── Instrument (Akustisk / El-gitarr) ──────────────────────────
+var curInstrument='acoustic';
+function maxFretsPenta(){ return curInstrument==='electric'?21:14; }
+function maxFretsNeck(){ return curInstrument==='electric'?21:12; }
+
+function buildElectricExtras(){
+  var isEl=curInstrument==='electric';
+  var mk=function(t){return document.createElementNS(ns,t);};
+  var strY=[22,54,86,118,150,178];
+  var strSW=[0.8,1.1,1.4,1.8,2.1,2.4];
+  var strOp=['0.25','0.28','0.32','0.36','0.40','0.45'];
+  function mkLine(x1,y1,x2,y2,stroke,sw){
+    var l=mk('line');
+    l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);
+    l.setAttribute('stroke',stroke);l.setAttribute('stroke-width',sw);return l;
+  }
+  function mkTxt(x,y,fs,fill,txt){
+    var t=mk('text');t.setAttribute('x',x);t.setAttribute('y',y);
+    t.setAttribute('text-anchor','middle');t.setAttribute('font-size',fs);
+    t.setAttribute('fill',fill);t.textContent=txt;return t;
+  }
+  function mkDot(cx,cy,r){
+    var c=mk('circle');c.setAttribute('cx',cx);c.setAttribute('cy',cy);
+    c.setAttribute('r',r);c.setAttribute('fill','rgba(255,255,255,0.07)');return c;
+  }
+  function clearG(id){var g=document.getElementById(id);while(g.firstChild)g.removeChild(g.firstChild);return g;}
+
+  // ── PENTA (spacing=44, nut x=60, strings end at 670) ──
+  var pSvg=document.querySelector('#panel-penta svg');
+  var pg=clearG('p-extra');
+  if(isEl){
+    pSvg.setAttribute('viewBox','0 0 998 215');
+    strY.forEach(function(y,i){pg.appendChild(mkLine(670,y,992,y,'rgba(255,255,255,'+strOp[i]+')',strSW[i]));});
+    for(var f=14;f<=21;f++){
+      var fx=60+f*44;
+      pg.appendChild(mkLine(fx,12,fx,190,'rgba(255,255,255,0.12)',1));
+      pg.appendChild(mkTxt(60+(f-0.5)*44,205,10,'rgba(255,255,255,0.2)',f));
+    }
+    [15,17,19].forEach(function(f){pg.appendChild(mkDot(bxP(f),102,4));});
+    [70,134].forEach(function(cy){pg.appendChild(mkDot(bxP(21),cy,4));});
+  } else {
+    pSvg.setAttribute('viewBox','0 0 680 215');
+  }
+
+  // ── MODAL (spacing=48, nut x=60, strings end at 650) ──
+  var mSvg=document.querySelector('#panel-modal svg');
+  var mg=clearG('m-extra');
+  if(isEl){
+    mSvg.setAttribute('viewBox','0 0 1080 220');
+    strY.forEach(function(y,i){mg.appendChild(mkLine(650,y,1074,y,'rgba(255,255,255,'+strOp[i]+')',strSW[i]));});
+    for(var f=13;f<=21;f++){
+      var fx=60+f*48;
+      mg.appendChild(mkLine(fx,12,fx,190,'rgba(255,255,255,0.12)',1));
+      mg.appendChild(mkTxt(60+(f-0.5)*48,210,10,'rgba(255,255,255,0.2)',f));
+    }
+    [15,17,19].forEach(function(f){mg.appendChild(mkDot(bxM(f),102,4));});
+    [70,134].forEach(function(cy){mg.appendChild(mkDot(bxM(21),cy,4));});
+  } else {
+    mSvg.setAttribute('viewBox','0 0 660 220');
+  }
+
+  // ── HALS (spacing=50, nut x=55, strings end at 660) ──
+  var hSvg=document.querySelector('#panel-hals svg');
+  var hg=clearG('h-extra');
+  if(isEl){
+    hSvg.setAttribute('viewBox','0 0 1116 220');
+    strY.forEach(function(y,i){hg.appendChild(mkLine(660,y,1110,y,'rgba(255,255,255,'+strOp[i]+')',strSW[i]));});
+    for(var f=13;f<=21;f++){
+      var fx=55+f*50;
+      hg.appendChild(mkLine(fx,12,fx,192,'rgba(255,255,255,0.12)',1));
+      hg.appendChild(mkTxt(55+(f-0.5)*50,210,9,'rgba(255,255,255,0.2)',f));
+    }
+    [15,17,19].forEach(function(f){hg.appendChild(mkDot(55+(f-0.5)*50,102,4));});
+    [70,134].forEach(function(cy){hg.appendChild(mkDot(55+(20.5)*50,cy,4));});
+  } else {
+    hSvg.setAttribute('viewBox','0 0 670 220');
+  }
+}
+
+function toggleInstrument(){
+  curInstrument=curInstrument==='acoustic'?'electric':'acoustic';
+  var btn=document.getElementById('inst-btn');
+  btn.textContent=curInstrument==='electric'?'El-gitarr':'Akustisk';
+  btn.className='btn'+(curInstrument==='electric'?' active':'');
+  buildElectricExtras();
+  render(); selectG(curGrepp);
+  renderModal();
+  renderHals();
+}
+
+// ── Mood-omvandling ────────────────────────────────────────────
+var curMood=null;
+var moodDefs={
+  mystiskt:{
+    lbl:'Mystiskt',
+    hint:'Mörka sjundeackord och spänning — maj7, m7, dim7, V7',
+    tfm:function(d,mode,rs){
+      var root=chromatic[(rs+scaleIvs[mode][d])%12];
+      var q=triadQ[mode][d];
+      if((mode==='dur'&&d===4)||(mode==='moll'&&d===4)) return root+'7';
+      if(q==='maj') return root+'maj7';
+      if(q==='min') return root+'m7';
+      if(q==='dim') return root+'°7';
+      return root;
+    }
+  },
+  svavande:{
+    lbl:'Svävande',
+    hint:'Öppna, suspenderade klanger utan ters — add9, sus2, m11',
+    tfm:function(d,mode,rs){
+      var root=chromatic[(rs+scaleIvs[mode][d])%12];
+      var q=triadQ[mode][d];
+      if(q==='maj') return root+'add9';
+      if(q==='min') return root+'m11';
+      if(q==='dim') return root+'m7b5';
+      return root;
+    }
+  }
+};
+
+function renderMood(){
+  var row=document.getElementById('a-mood-row');
+  row.innerHTML='';
+  Object.keys(moodDefs).forEach(function(k){
+    var b=document.createElement('button');
+    b.className='a-prog-btn'+(curMood===k?' active':'');
+    b.textContent=moodDefs[k].lbl;
+    b.onclick=(function(key){return function(){curMood=(curMood===key?null:key);renderMood();};})(k);
+    row.appendChild(b);
+  });
+  var hint=document.getElementById('a-mood-hint');
+  var disp=document.getElementById('a-mood-display');
+  disp.innerHTML='';
+  if(!curMood||curAkProg===null){
+    hint.textContent=curMood&&curAkProg===null?'Välj en följd ovan för att se omvandlingen':'';
+    return;
+  }
+  hint.textContent=moodDefs[curMood].hint;
+  var rs=rootSemitones[curAkKey];
+  var mode=curAkMode;
+  var progs=ackordProgs[mode];
+  var rn=romanNum[mode];
+  progs[curAkProg].deg.forEach(function(d,i){
+    if(i>0){var a=document.createElement('span');a.className='a-arrow';a.textContent='→';disp.appendChild(a);}
+    var ch=document.createElement('div');
+    ch.className='a-display-chord';
+    ch.innerHTML='<div class="a-display-num">'+rn[d]+'</div><div class="a-display-name" style="font-size:18px">'+moodDefs[curMood].tfm(d,mode,rs)+'</div>';
+    disp.appendChild(ch);
+  });
+}
+
 // ── Tabbar ─────────────────────────────────────────────────────
 function switchTab(t){
   ['penta','modal','hals','ackord','grepp','cof'].forEach(function(id){
@@ -981,7 +1147,7 @@ function renderHals(){
   while(c.firstChild)c.removeChild(c.firstChild);
   var root=rootSemitones[curHalsKey];
   for(var s=0;s<6;s++){
-    for(var f=0;f<=12;f++){
+    for(var f=0;f<=maxFretsNeck();f++){
       var note=(openNotes[s]+f)%12;
       var isRoot=(note===root);
       var cx=f===0?30:55+(f-0.5)*50;
@@ -1013,6 +1179,8 @@ render(); selectG(1);
 renderModal();
 renderHals();
 renderAckord();
+renderMood();
+buildElectricExtras();
 renderGrepp();
 renderCof();
 
