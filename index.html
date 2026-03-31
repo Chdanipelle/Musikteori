@@ -1137,8 +1137,17 @@ function buildElectricExtras(){
   // ── PENTA (spacing=44, nut x=60, strings end at 670) ──
   var pSvg=document.querySelector('#panel-penta svg');
   var pg=clearG('p-extra');
+  // Scale electric to same visual size as acoustic: compute acoustic display width
+  // then scale proportionally so 1 viewBox unit = same px in both modes.
+  function elW(svg, acVW, elVW){
+    var cw=svg.parentElement.clientWidth||900;
+    var acPx=Math.min(cw,900);
+    return Math.ceil(acPx*(elVW/acVW));
+  }
+
   if(isEl){
     pSvg.setAttribute('viewBox','0 0 998 215');
+    pSvg.style.width=elW(pSvg,680,998)+'px'; pSvg.style.maxWidth='none';
     strY.forEach(function(y,i){pg.appendChild(mkLine(670,y,992,y,'rgba(255,255,255,'+strOp[i]+')',strSW[i]));});
     for(var f=14;f<=21;f++){
       var fx=60+f*44;
@@ -1149,6 +1158,7 @@ function buildElectricExtras(){
     [70,134].forEach(function(cy){pg.appendChild(mkDot(bxP(21),cy,4));});
   } else {
     pSvg.setAttribute('viewBox','0 0 680 215');
+    pSvg.style.width=''; pSvg.style.maxWidth='';
   }
 
   // ── MODAL (spacing=48, nut x=60, strings end at 650) ──
@@ -1156,6 +1166,7 @@ function buildElectricExtras(){
   var mg=clearG('m-extra');
   if(isEl){
     mSvg.setAttribute('viewBox','0 0 1080 220');
+    mSvg.style.width=elW(mSvg,660,1080)+'px'; mSvg.style.maxWidth='none';
     strY.forEach(function(y,i){mg.appendChild(mkLine(650,y,1074,y,'rgba(255,255,255,'+strOp[i]+')',strSW[i]));});
     for(var f=13;f<=21;f++){
       var fx=60+f*48;
@@ -1166,6 +1177,7 @@ function buildElectricExtras(){
     [70,134].forEach(function(cy){mg.appendChild(mkDot(bxM(21),cy,4));});
   } else {
     mSvg.setAttribute('viewBox','0 0 660 220');
+    mSvg.style.width=''; mSvg.style.maxWidth='';
   }
 
   // ── HALS (spacing=50, nut x=55, strings end at 660) ──
@@ -1173,6 +1185,7 @@ function buildElectricExtras(){
   var hg=clearG('h-extra');
   if(isEl){
     hSvg.setAttribute('viewBox','0 0 1116 220');
+    hSvg.style.width=elW(hSvg,670,1116)+'px'; hSvg.style.maxWidth='none';
     strY.forEach(function(y,i){hg.appendChild(mkLine(660,y,1110,y,'rgba(255,255,255,'+strOp[i]+')',strSW[i]));});
     for(var f=13;f<=21;f++){
       var fx=55+f*50;
@@ -1183,6 +1196,7 @@ function buildElectricExtras(){
     [70,134].forEach(function(cy){hg.appendChild(mkDot(55+(20.5)*50,cy,4));});
   } else {
     hSvg.setAttribute('viewBox','0 0 670 220');
+    hSvg.style.width=''; hSvg.style.maxWidth='';
   }
 }
 
