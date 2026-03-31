@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="sv">
 <head>
 <meta charset="UTF-8">
@@ -39,20 +39,20 @@ body {
 
 /* ── Ljust tema ── */
 body.light {
-  --bg:       #f5f5f0;
-  --bg2:      #ebebе6;
-  --bg3:      #e2e2dd;
-  --border:   #d0d0ca;
-  --border2:  #c0c0ba;
-  --text:     #1a1a1a;
-  --text2:    #333;
-  --text3:    #555;
-  --muted:    #777;
-  --muted2:   #999;
-  --accent:   #c47d00;
-  --accent-bg:rgba(196,125,0,0.1);
-  --accent-bd:rgba(196,125,0,0.5);
-  --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
+  --bg:        #ffffff;
+  --bg2:       #f3f3f3;
+  --bg3:       #e8e8e8;
+  --border:    #d8d8d8;
+  --border2:   #c4c4c4;
+  --text:      #0d0d0d;
+  --text2:     #222222;
+  --text3:     #4a4a4a;
+  --muted:     #747474;
+  --muted2:    #9a9a9a;
+  --accent:    #b06000;
+  --accent-bg: rgba(176,96,0,0.09);
+  --accent-bd: rgba(176,96,0,0.45);
+  --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23777'/%3E%3C/svg%3E");
   --fret-clr:   rgba(0,0,0,0.12);
   --nut-clr:    rgba(0,0,0,0.5);
   --dot-clr:    rgba(0,0,0,0.07);
@@ -61,64 +61,21 @@ body.light {
   background: var(--bg); color: var(--text);
 }
 
-/* Tab bar */
-.tab-bar { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 20px; gap: 0; align-items: center; }
-.tab { background: none; border: none; border-bottom: 2px solid transparent; color: var(--muted); padding: 9px 18px; cursor: pointer; font-size: 13px; font-weight: 500; letter-spacing: 0.2px; margin-bottom: -1px; transition: color 0.15s; }
-.tab:hover { color: var(--text3); }
-.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-
-/* Controls */
-.controls { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
-select {
-  background: var(--bg2); color: var(--text2); border: 1px solid var(--border2);
-  border-radius: 6px; padding: 6px 10px; font-size: 13px; cursor: pointer;
-  appearance: none; -webkit-appearance: none;
-  background-image: var(--select-arrow);
-  background-repeat: no-repeat; background-position: right 9px center; padding-right: 26px;
-}
-select:hover { border-color: var(--muted); }
-.btn { padding: 5px 13px; border-radius: 20px; border: 1px solid var(--border2); background: transparent; color: var(--muted); font-size: 12px; cursor: pointer; transition: all 0.15s; }
-.btn:hover { color: var(--text2); border-color: var(--muted); }
-.btn.active { background: var(--accent-bg); border-color: var(--accent-bd); color: var(--accent); }
-.btn.all-active { background: var(--bg3); border-color: var(--muted2); color: var(--text3); }
-.btn.mode-act { background: rgba(100,210,130,0.1); border-color: rgba(90,200,110,0.5); color: #5c5; }
-.sep { width: 1px; height: 18px; background: var(--border); display: inline-block; margin: 0 2px; flex-shrink: 0; align-self: center; }
-
-/* Labels */
-#glabel { font-size: 12px; color: var(--muted); margin-bottom: 8px; min-height: 16px; }
-#mlabel { font-size: 13px; color: var(--text3); margin-bottom: 4px; font-weight: 500; min-height: 18px; }
-#mformula { font-size: 12px; color: var(--muted); margin-bottom: 10px; letter-spacing: 0.4px; min-height: 16px; }
-
-/* Fretboard */
-.fretboard { display: block; width: 100%; max-width: 900px; }
-
-/* Legend */
-.legend { display: flex; gap: 14px; margin-top: 8px; font-size: 12px; color: var(--muted); align-items: center; }
-
-/* Login overlay */
-#login-overlay {
-  position: fixed; inset: 0; background: var(--bg);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  z-index: 9999; gap: 12px;
-}
-#login-overlay h2 { color: var(--text3); font-size: 14px; font-weight: 400; letter-spacing: 1px; margin-bottom: 8px; }
-#login-overlay input {
-  background: var(--bg2); color: var(--text2); border: 1px solid var(--border2); border-radius: 6px;
-  padding: 8px 14px; font-size: 13px; outline: none; width: 220px; text-align: center;
-}
-#login-overlay input:focus { border-color: var(--muted); }
-#login-overlay button {
-  padding: 7px 24px; border-radius: 20px; border: 1px solid var(--accent-bd);
-  background: var(--accent-bg); color: var(--accent); font-size: 12px; cursor: pointer;
-  transition: all 0.15s; margin-top: 4px;
-}
-#login-overlay button:hover { background: rgba(240,168,48,0.15); }
-#login-error { font-size: 12px; color: #c0392b; min-height: 16px; }
-.ld { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 4px; vertical-align: middle; }
-
-/* Ljust tema — fretboard behåller mörkt utseende, omgiven av ljus UI */
+/* Ljust tema — fretboards & ackordgrepp behåller mörkt utseende */
 body.light .fb-wrap { background: #1c1c1c; border-radius: 8px; padding: 10px; margin: 0 -10px 8px; }
+body.light .gl-diagram { background: #1e1e1e; border-radius: 8px; padding: 6px 4px 2px; }
+body.light .gl-diagram-lbl { color: #888; }
 
+/* Ljust tema — tydligare separationer */
+body.light .tab-bar { background: #f9f9f9; border-color: #d0d0d0; }
+body.light select { background: #f3f3f3; border-color: #c4c4c4; color: #111; }
+body.light .btn { border-color: #c4c4c4; color: #555; }
+body.light .btn:hover { background: #efefef; color: #222; }
+body.light .a-card { box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+body.light .a-section-lbl { color: #555; border-bottom-color: #ddd; }
+body.light .a-display-chord { background: #f3f3f3; border: 1px solid #ddd; border-radius: 8px; padding: 6px 10px; }
+body.light #login-overlay { background: #fff; }
+body.light #login-overlay input { background: #f3f3f3; color: #111; border-color: #c4c4c4; }
 /* Mood-omvandling */
 .a-mood-hint { font-size:10px; color:var(--muted2); font-style:italic; margin-bottom:8px; min-height:14px; }
 
@@ -163,6 +120,91 @@ body.light .fb-wrap { background: #1c1c1c; border-radius: 8px; padding: 10px; ma
 .a-display-num { font-size: 10px; color: var(--muted); }
 .a-display-name { font-size: 22px; font-weight: 700; color: var(--text); }
 .a-arrow { font-size: 13px; color: var(--border2); align-self: center; }
+
+/* Tab bar */
+.tab-bar { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 20px; gap: 0; align-items: center; }
+.tab { background: none; border: none; border-bottom: 2px solid transparent; color: var(--muted); padding: 9px 18px; cursor: pointer; font-size: 13px; font-weight: 500; letter-spacing: 0.2px; margin-bottom: -1px; transition: color 0.15s; }
+.tab:hover { color: var(--text3); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* Controls */
+.controls { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+select {
+  background: var(--bg2); color: var(--text2); border: 1px solid var(--border2);
+  border-radius: 6px; padding: 6px 10px; font-size: 13px; cursor: pointer;
+  appearance: none; -webkit-appearance: none;
+  background-image: var(--select-arrow);
+  background-repeat: no-repeat; background-position: right 9px center; padding-right: 26px;
+}
+select:hover { border-color: var(--muted); }
+.btn { padding: 5px 13px; border-radius: 20px; border: 1px solid var(--border2); background: transparent; color: var(--muted); font-size: 12px; cursor: pointer; transition: all 0.15s; }
+.btn:hover { color: var(--text2); border-color: var(--muted); }
+.btn.active { background: var(--accent-bg); border-color: var(--accent-bd); color: var(--accent); }
+.btn.all-active { background: var(--bg3); border-color: var(--muted2); color: var(--text3); }
+.btn.mode-act { background: rgba(100,210,130,0.1); border-color: rgba(90,200,110,0.5); color: #5c5; }
+.sep { width: 1px; height: 18px; background: var(--border); display: inline-block; margin: 0 2px; flex-shrink: 0; align-self: center; }
+
+/* Labels */
+#glabel { font-size: 12px; color: var(--muted); margin-bottom: 8px; min-height: 16px; }
+#mlabel { font-size: 13px; color: var(--text3); margin-bottom: 4px; font-weight: 500; min-height: 18px; }
+#mformula { font-size: 12px; color: var(--muted); margin-bottom: 10px; letter-spacing: 0.4px; min-height: 16px; }
+
+/* Fretboard */
+.fretboard { display: block; width: 100%; max-width: 900px; }
+.fb-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* Legend */
+.legend { display: flex; gap: 14px; margin-top: 8px; font-size: 12px; color: var(--muted); align-items: center; }
+
+/* Login overlay */
+#login-overlay {
+  position: fixed; inset: 0; background: var(--bg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 9999; gap: 12px;
+}
+#login-overlay h2 { color: var(--text3); font-size: 14px; font-weight: 400; letter-spacing: 1px; margin-bottom: 8px; }
+#login-overlay input {
+  background: var(--bg2); color: var(--text2); border: 1px solid var(--border2); border-radius: 6px;
+  padding: 8px 14px; font-size: 13px; outline: none; width: 220px; text-align: center;
+}
+#login-overlay input:focus { border-color: var(--muted); }
+#login-overlay button {
+  padding: 7px 24px; border-radius: 20px; border: 1px solid var(--accent-bd);
+  background: var(--accent-bg); color: var(--accent); font-size: 12px; cursor: pointer;
+  transition: all 0.15s; margin-top: 4px;
+}
+#login-overlay button:hover { background: rgba(240,168,48,0.15); }
+#login-error { font-size: 12px; color: #c0392b; min-height: 16px; }
+.ld { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 4px; vertical-align: middle; }
+
+/* Anteckningar */
+#notes-text {
+  width: 100%; min-height: 100px; max-height: 300px;
+  background: var(--bg2); color: var(--text2); border: 1px solid var(--border2);
+  border-radius: 8px; padding: 10px 12px; font-size: 13px; font-family: inherit;
+  resize: vertical; outline: none; transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+#notes-text:focus { border-color: var(--muted); }
+.notes-table-header { display: flex; gap: 8px; margin-bottom: 4px; padding: 0 2px; }
+.notes-col-hd { flex: 1; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted2); }
+.notes-row { display: flex; gap: 8px; margin-bottom: 6px; align-items: center; }
+.notes-row input {
+  flex: 1; background: var(--bg2); color: var(--text2); border: 1px solid var(--border);
+  border-radius: 6px; padding: 6px 10px; font-size: 13px; font-family: inherit; outline: none;
+  transition: border-color 0.15s;
+}
+.notes-row input:focus { border-color: var(--muted); }
+.notes-del { width: 28px; height: 28px; border-radius: 6px; border: 1px solid transparent;
+  background: transparent; color: var(--muted); font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
+.notes-del:hover { background: rgba(200,60,60,0.12); border-color: rgba(200,60,60,0.35); color: #c43c3c; }
+.notes-add-btn {
+  margin-top: 10px; padding: 6px 16px; border-radius: 20px;
+  border: 1px dashed var(--border2); background: transparent; color: var(--muted);
+  font-size: 12px; cursor: pointer; transition: all 0.15s;
+}
+.notes-add-btn:hover { border-color: var(--muted); color: var(--text3); }
 </style>
 </head>
 <body>
@@ -183,6 +225,7 @@ body.light .fb-wrap { background: #1c1c1c; border-radius: 8px; padding: 10px; ma
   <button class="tab" id="tab-ackord" onclick="switchTab('ackord')">Ackordföljder</button>
   <button class="tab" id="tab-grepp" onclick="switchTab('grepp')">Ackordgrepp</button>
   <button class="tab" id="tab-cof" onclick="switchTab('cof')">Kvintcirkel</button>
+  <button class="tab" id="tab-notes" onclick="switchTab('notes')">Anteckningar</button>
   <button class="btn" id="inst-btn" onclick="toggleInstrument()" style="margin-left:auto;font-size:11px;padding:4px 10px;margin-bottom:1px">Akustisk</button>
   <button class="btn" id="theme-btn" onclick="toggleTheme()" style="font-size:11px;padding:4px 10px;margin-bottom:1px;margin-left:4px">☀ Ljust</button>
 </div>
@@ -432,6 +475,7 @@ body.light .fb-wrap { background: #1c1c1c; border-radius: 8px; padding: 10px; ma
   <div class="a-section-lbl">Vanliga följder</div>
   <div class="a-progs" id="a-prog-row"></div>
   <div class="a-display" id="a-prog-display"></div>
+  <div class="gl-diagrams" id="a-prog-diagrams" style="margin-top:14px"></div>
   <div style="margin-top:18px;padding-top:14px;border-top:1px solid #1a1a1a">
     <div class="a-section-lbl">Karaktär</div>
     <div class="a-progs" id="a-mood-row"></div>
@@ -453,6 +497,19 @@ body.light .fb-wrap { background: #1c1c1c; border-radius: 8px; padding: 10px; ma
 <div id="panel-cof" style="display:none">
   <svg class="cof-svg" viewBox="0 0 320 320"><g id="cof-g"></g></svg>
   <div class="cof-info" id="cof-info"><p style="color:#333;font-size:12px;text-align:center;margin-top:6px">Tryck på en tonart</p></div>
+</div>
+<!-- ═══ ANTECKNINGAR ═══ -->
+<div id="panel-notes" style="display:none">
+  <textarea id="notes-text" placeholder="Skriv fritt här…"></textarea>
+  <div style="margin-top:24px">
+    <div class="notes-table-header">
+      <div class="notes-col-hd">Ackord / Begrepp</div>
+      <div class="notes-col-hd">Anteckning</div>
+      <div style="width:32px"></div>
+    </div>
+    <div id="notes-rows"></div>
+    <button class="notes-add-btn" onclick="notesAddRow()">+ Lägg till rad</button>
+  </div>
 </div>
 </div><!-- #app -->
 
@@ -737,14 +794,46 @@ function renderAckord(){
   });
 
   var disp=document.getElementById('a-prog-display');
-  disp.innerHTML='';
+  var diagDiv=document.getElementById('a-prog-diagrams');
+  disp.innerHTML=''; diagDiv.innerHTML='';
   if(curAkProg!==null){
+    var typeMap=[
+      ['m7b5','m7b5'],['maj7','maj7'],['add9','add9'],['sus2','sus2'],['sus4','sus4'],
+      ['aug','aug'],['dim','dim'],['m7','m7'],['7','7'],['m','min'],['°','dim']
+    ];
     progs[curAkProg].deg.forEach(function(d,i){
       if(i>0){var arr=document.createElement('span');arr.className='a-arrow';arr.textContent='→';disp.appendChild(arr);}
       var ch=document.createElement('div');
       ch.className='a-display-chord';
-      ch.innerHTML='<div class="a-display-num">'+rn[d]+'</div><div class="a-display-name">'+akChordName(d,mode,rs)+'</div>';
+      var cname=akChordName(d,mode,rs);
+      ch.innerHTML='<div class="a-display-num">'+rn[d]+'</div><div class="a-display-name">'+cname+'</div>';
       disp.appendChild(ch);
+
+      var rootIdx=-1, chType='maj';
+      var sortedKeys=keyNames.slice().sort(function(a,b){return b.length-a.length;});
+      for(var ki=0;ki<sortedKeys.length;ki++){
+        if(cname.indexOf(sortedKeys[ki])===0){
+          rootIdx=keyNames.indexOf(sortedKeys[ki]);
+          var sfx=cname.slice(sortedKeys[ki].length);
+          chType='maj';
+          for(var ti=0;ti<typeMap.length;ti++){
+            if(sfx===typeMap[ti][0]){chType=typeMap[ti][1];break;}
+          }
+          break;
+        }
+      }
+      if(rootIdx<0||!glTemplates[chType]) return;
+      var vs=glVoicings(rootIdx,chType);
+      if(!vs.length) return;
+      var wrap=document.createElement('div');
+      wrap.className='gl-diagram';
+      var prevRoot=curGlRoot; curGlRoot=rootIdx;
+      wrap.appendChild(glDraw(vs[0].frets));
+      curGlRoot=prevRoot;
+      var lbl=document.createElement('div');
+      lbl.className='gl-diagram-lbl'; lbl.textContent=cname;
+      wrap.appendChild(lbl);
+      diagDiv.appendChild(wrap);
     });
   }
 }
@@ -770,7 +859,7 @@ var glTemplates={
   sus4: {lbl:'sus4', E:[0,2,2,2,0,0],    A:[-1,0,2,2,3,0]},
   dim:  {lbl:'dim',  E:null,             A:[-1,0,1,2,1,-1]},
   aug:  {lbl:'aug',  E:[0,3,2,1,1,0],    A:[-1,0,3,2,2,1]},
-  add9: {lbl:'add9', E:[0,2,2,1,0,2],    A:[-1,0,2,4,2,0]}
+  add9: {lbl:'add9', E:[0,2,2,1,0,2],    A:null}
 };
 // Hardcoded open voicings — key = "rootIndex_type"
 // rootIndex: A=0 Bb=1 B=2 C=3 C#=4 D=5 Eb=6 E=7 F=8 F#=9 G=10 G#=11
@@ -790,18 +879,27 @@ var glOpen={
 
 var curGlRoot=0, curGlType='maj';
 
+function glMinFret(frets){
+  var p=frets.filter(function(f){return f>0;});
+  return p.length?Math.min.apply(null,p):999;
+}
 function glVoicings(rootIdx,type){
-  var rs=rootSemitones[rootIdx], tmpl=glTemplates[type], v=[];
+  var rs=rootSemitones[rootIdx], tmpl=glTemplates[type], ev=null, av=null;
   if(tmpl.E){
     var rf=(rs-4+12)%12;
-    v.push({frets:tmpl.E.map(function(o){return o===-1?-1:rf+o;}),rf:rf});
+    ev={frets:tmpl.E.map(function(o){return o===-1?-1:rf+o;}),rf:rf};
   }
   if(tmpl.A){
     var rf2=(rs-9+12)%12;
-    var f2=tmpl.A.map(function(o){return o===-1?-1:rf2+o;});
-    if(!v.some(function(x){return x.frets.join()===f2.join();}))
-      v.push({frets:f2,rf:rf2});
+    av={frets:tmpl.A.map(function(o){return o===-1?-1:rf2+o;}),rf:rf2};
   }
+  // Prefer whichever shape sits lower on the neck
+  var v=[];
+  if(ev&&av){
+    if(glMinFret(av.frets)<=glMinFret(ev.frets)){ v.push(av); v.push(ev); }
+    else { v.push(ev); v.push(av); }
+  } else if(ev){ v.push(ev); } else if(av){ v.push(av); }
+  // Open/special voicings always first
   var ok=rootIdx+'_'+type;
   if(glOpen[ok]){
     var of_=glOpen[ok];
@@ -815,7 +913,8 @@ function glDraw(frets){
   var rs=rootSemitones[curGlRoot];
   var pressed=frets.filter(function(f){return f>0;});
   var minF=pressed.length?Math.min.apply(null,pressed):1;
-  var sf=minF<=3?1:minF; // start fret
+  var maxF=pressed.length?Math.max.apply(null,pressed):1;
+  var sf=(minF<=3&&maxF<=4)?1:minF; // show nut only when all notes fit within frets 1-4
   var hasNut=sf===1;
   // Barre: 2+ strings at startFret with span ≥ 2
   var atSF=[]; frets.forEach(function(f,i){if(f===sf)atSF.push(i);});
@@ -846,11 +945,11 @@ function glDraw(frets){
     svg.appendChild(L(sx[0],fy,sx[5],fy,isNut?'rgba(255,255,255,0.5)':'rgba(255,255,255,0.15)',isNut?3.5:1));
   }
 
-  // Fret label if no nut
+  // Fret label if no nut — drawn above the fret grid so barre doesn't cover it
   if(!hasNut){
-    var lt=mk('text');lt.setAttribute('x',W-1);lt.setAttribute('y',topY+fh*0.5);
-    lt.setAttribute('text-anchor','end');lt.setAttribute('dominant-baseline','central');
-    lt.setAttribute('font-size','8');lt.setAttribute('fill','rgba(255,255,255,0.25)');
+    var lt=mk('text');lt.setAttribute('x',W-2);lt.setAttribute('y',topY-5);
+    lt.setAttribute('text-anchor','end');lt.setAttribute('dominant-baseline','auto');
+    lt.setAttribute('font-size','8');lt.setAttribute('fill','rgba(255,255,255,0.45)');
     lt.textContent=sf+'fr';svg.appendChild(lt);
   }
 
@@ -858,9 +957,9 @@ function glDraw(frets){
   if(hasBar){
     var by=topY+0.5*fh;
     var br=mk('rect');
-    br.setAttribute('x',sx[atSF[0]]-6);br.setAttribute('y',by-7);
-    br.setAttribute('width',sx[atSF[atSF.length-1]]-sx[atSF[0]]+12);
-    br.setAttribute('height',14);br.setAttribute('rx',7);
+    br.setAttribute('x',sx[atSF[0]]-7);br.setAttribute('y',by-4);
+    br.setAttribute('width',sx[atSF[atSF.length-1]]-sx[atSF[0]]+14);
+    br.setAttribute('height',8);br.setAttribute('rx',4);
     br.setAttribute('fill','rgba(190,190,190,0.88)');
     svg.appendChild(br);
   }
@@ -1081,8 +1180,17 @@ function buildElectricExtras(){
   // ── PENTA (spacing=44, nut x=60, strings end at 670) ──
   var pSvg=document.querySelector('#panel-penta svg');
   var pg=clearG('p-extra');
+  // Scale electric to same visual size as acoustic: compute acoustic display width
+  // then scale proportionally so 1 viewBox unit = same px in both modes.
+  function elW(svg, acVW, elVW){
+    var cw=svg.parentElement.clientWidth||900;
+    var acPx=Math.min(cw,900);
+    return Math.ceil(acPx*(elVW/acVW));
+  }
+
   if(isEl){
     pSvg.setAttribute('viewBox','0 0 998 215');
+    pSvg.style.width=elW(pSvg,680,998)+'px'; pSvg.style.maxWidth='none';
     strY.forEach(function(y,i){pg.appendChild(mkLine(670,y,992,y,'rgba(255,255,255,'+strOp[i]+')',strSW[i]));});
     for(var f=14;f<=21;f++){
       var fx=60+f*44;
@@ -1093,6 +1201,7 @@ function buildElectricExtras(){
     [70,134].forEach(function(cy){pg.appendChild(mkDot(bxP(21),cy,4));});
   } else {
     pSvg.setAttribute('viewBox','0 0 680 215');
+    pSvg.style.width=''; pSvg.style.maxWidth='';
   }
 
   // ── MODAL (spacing=48, nut x=60, strings end at 650) ──
@@ -1100,6 +1209,7 @@ function buildElectricExtras(){
   var mg=clearG('m-extra');
   if(isEl){
     mSvg.setAttribute('viewBox','0 0 1080 220');
+    mSvg.style.width=elW(mSvg,660,1080)+'px'; mSvg.style.maxWidth='none';
     strY.forEach(function(y,i){mg.appendChild(mkLine(650,y,1074,y,'rgba(255,255,255,'+strOp[i]+')',strSW[i]));});
     for(var f=13;f<=21;f++){
       var fx=60+f*48;
@@ -1110,6 +1220,7 @@ function buildElectricExtras(){
     [70,134].forEach(function(cy){mg.appendChild(mkDot(bxM(21),cy,4));});
   } else {
     mSvg.setAttribute('viewBox','0 0 660 220');
+    mSvg.style.width=''; mSvg.style.maxWidth='';
   }
 
   // ── HALS (spacing=50, nut x=55, strings end at 660) ──
@@ -1117,6 +1228,7 @@ function buildElectricExtras(){
   var hg=clearG('h-extra');
   if(isEl){
     hSvg.setAttribute('viewBox','0 0 1116 220');
+    hSvg.style.width=elW(hSvg,670,1116)+'px'; hSvg.style.maxWidth='none';
     strY.forEach(function(y,i){hg.appendChild(mkLine(660,y,1110,y,'rgba(255,255,255,'+strOp[i]+')',strSW[i]));});
     for(var f=13;f<=21;f++){
       var fx=55+f*50;
@@ -1127,6 +1239,7 @@ function buildElectricExtras(){
     [70,134].forEach(function(cy){hg.appendChild(mkDot(55+(20.5)*50,cy,4));});
   } else {
     hSvg.setAttribute('viewBox','0 0 670 220');
+    hSvg.style.width=''; hSvg.style.maxWidth='';
   }
 }
 
@@ -1210,10 +1323,11 @@ function renderMood(){
       ['m7b5','m7b5'],['maj7','maj7'],['add9','add9'],['sus2','sus2'],['sus4','sus4'],
       ['aug','aug'],['dim','dim'],['m11','m7'],['°7','dim'],['m7','m7'],['7','7'],['m','min'],['°','dim']
     ];
-    for(var ki=0;ki<keyNames.length;ki++){
-      if(moodName.indexOf(keyNames[ki])===0){
-        rootIdx=ki;
-        var sfx=moodName.slice(keyNames[ki].length);
+    var sortedKeys=keyNames.slice().sort(function(a,b){return b.length-a.length;});
+    for(var ki=0;ki<sortedKeys.length;ki++){
+      if(moodName.indexOf(sortedKeys[ki])===0){
+        rootIdx=keyNames.indexOf(sortedKeys[ki]);
+        var sfx=moodName.slice(sortedKeys[ki].length);
         chType='maj';
         for(var ti=0;ti<typeMap.length;ti++){
           if(sfx===typeMap[ti][0]){chType=typeMap[ti][1];break;}
@@ -1226,7 +1340,9 @@ function renderMood(){
     if(!vs.length) return;
     var wrap=document.createElement('div');
     wrap.className='gl-diagram';
+    var prevRoot=curGlRoot; curGlRoot=rootIdx;
     wrap.appendChild(glDraw(vs[0].frets));
+    curGlRoot=prevRoot;
     var lbl=document.createElement('div');
     lbl.className='gl-diagram-lbl';lbl.textContent=moodName;
     wrap.appendChild(lbl);
@@ -1236,7 +1352,7 @@ function renderMood(){
 
 // ── Tabbar ─────────────────────────────────────────────────────
 function switchTab(t){
-  ['penta','modal','hals','ackord','grepp','cof'].forEach(function(id){
+  ['penta','modal','hals','ackord','grepp','cof','notes'].forEach(function(id){
     document.getElementById('panel-'+id).style.display=t===id?'':'none';
     document.getElementById('tab-'+id).className='tab'+(t===id?' active':'');
   });
@@ -1276,6 +1392,41 @@ function renderHals(){
 document.getElementById('h-key').addEventListener('change',function(){
   curHalsKey=parseInt(this.value); renderHals();
 });
+
+// ── Anteckningar ───────────────────────────────────────────────
+function notesSave(){
+  var rows=[];
+  document.querySelectorAll('.notes-row').forEach(function(r){
+    var ins=r.querySelectorAll('input');
+    rows.push([ins[0].value, ins[1].value]);
+  });
+  localStorage.setItem('notes_text', document.getElementById('notes-text').value);
+  localStorage.setItem('notes_rows', JSON.stringify(rows));
+}
+
+function notesAddRow(a, b){
+  var div=document.createElement('div');
+  div.className='notes-row';
+  var i1=document.createElement('input');
+  i1.type='text'; i1.placeholder='Ackord / Begrepp'; i1.value=a||'';
+  var i2=document.createElement('input');
+  i2.type='text'; i2.placeholder='Anteckning'; i2.value=b||'';
+  var del=document.createElement('button');
+  del.className='notes-del'; del.textContent='×';
+  del.onclick=function(){ div.parentNode.removeChild(div); notesSave(); };
+  i1.oninput=i2.oninput=notesSave;
+  div.appendChild(i1); div.appendChild(i2); div.appendChild(del);
+  document.getElementById('notes-rows').appendChild(div);
+}
+
+(function notesInit(){
+  var savedText=localStorage.getItem('notes_text')||'';
+  document.getElementById('notes-text').value=savedText;
+  document.getElementById('notes-text').oninput=notesSave;
+  var savedRows=JSON.parse(localStorage.getItem('notes_rows')||'[]');
+  if(savedRows.length===0) savedRows=[['','']];
+  savedRows.forEach(function(r){ notesAddRow(r[0], r[1]); });
+})();
 
 // ── Init ───────────────────────────────────────────────────────
 render(); selectG(1);

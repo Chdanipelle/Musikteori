@@ -1,4 +1,4 @@
-const CACHE = 'gitarrverktyg-v6';
+const CACHE = 'gitarrverktyg-v8';
 const FILES = ['./index.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', e => {

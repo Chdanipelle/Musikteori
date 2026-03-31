@@ -200,11 +200,22 @@ select:hover { border-color: var(--muted); }
   display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
 .notes-del:hover { background: rgba(200,60,60,0.12); border-color: rgba(200,60,60,0.35); color: #c43c3c; }
 .notes-add-btn {
-  margin-top: 10px; padding: 6px 16px; border-radius: 20px;
+  padding: 6px 16px; border-radius: 20px;
   border: 1px dashed var(--border2); background: transparent; color: var(--muted);
   font-size: 12px; cursor: pointer; transition: all 0.15s;
 }
 .notes-add-btn:hover { border-color: var(--muted); color: var(--text3); }
+.notes-heading { display: flex; gap: 8px; margin-bottom: 6px; margin-top: 10px; align-items: center; }
+.notes-heading input {
+  flex: 1; background: transparent; color: var(--text2); border: none;
+  border-bottom: 1px solid var(--border2); padding: 4px 2px;
+  font-size: 13px; font-weight: 700; font-family: inherit; outline: none;
+  letter-spacing: 0.3px;
+}
+.notes-heading input:focus { border-bottom-color: var(--accent); }
+.notes-drag { width: 20px; cursor: grab; color: var(--muted2); font-size: 14px; text-align: center; flex-shrink: 0; user-select: none; touch-action: none; }
+.notes-drag:active { cursor: grabbing; }
+.notes-row.drag-over, .notes-heading.drag-over { outline: 2px solid var(--accent); border-radius: 6px; }
 </style>
 </head>
 <body>
@@ -219,13 +230,13 @@ select:hover { border-color: var(--muted); }
 
 <div id="app" style="display:none">
 <div class="tab-bar">
+  <button class="tab" id="tab-notes" onclick="switchTab('notes')">Anteckningar</button>
   <button class="tab active" id="tab-penta" onclick="switchTab('penta')">Pentatonisk</button>
   <button class="tab" id="tab-modal" onclick="switchTab('modal')">Modal</button>
   <button class="tab" id="tab-hals" onclick="switchTab('hals')">Hals</button>
   <button class="tab" id="tab-ackord" onclick="switchTab('ackord')">Ackordföljder</button>
   <button class="tab" id="tab-grepp" onclick="switchTab('grepp')">Ackordgrepp</button>
   <button class="tab" id="tab-cof" onclick="switchTab('cof')">Kvintcirkel</button>
-  <button class="tab" id="tab-notes" onclick="switchTab('notes')">Anteckningar</button>
   <button class="btn" id="inst-btn" onclick="toggleInstrument()" style="margin-left:auto;font-size:11px;padding:4px 10px;margin-bottom:1px">Akustisk</button>
   <button class="btn" id="theme-btn" onclick="toggleTheme()" style="font-size:11px;padding:4px 10px;margin-bottom:1px;margin-left:4px">☀ Ljust</button>
 </div>
@@ -508,7 +519,10 @@ select:hover { border-color: var(--muted); }
       <div style="width:32px"></div>
     </div>
     <div id="notes-rows"></div>
-    <button class="notes-add-btn" onclick="notesAddRow()">+ Lägg till rad</button>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="notes-add-btn" onclick="notesAddRow()">+ Lägg till rad</button>
+      <button class="notes-add-btn" onclick="notesAddHeading()">+ Rubrik</button>
+    </div>
   </div>
 </div>
 </div><!-- #app -->
@@ -1396,17 +1410,58 @@ document.getElementById('h-key').addEventListener('change',function(){
 // ── Anteckningar ───────────────────────────────────────────────
 function notesSave(){
   var rows=[];
-  document.querySelectorAll('.notes-row').forEach(function(r){
-    var ins=r.querySelectorAll('input');
-    rows.push([ins[0].value, ins[1].value]);
-  });
+  document.getElementById('notes-rows').children && Array.prototype.forEach.call(
+    document.getElementById('notes-rows').children, function(el){
+      if(el.classList.contains('notes-heading')){
+        rows.push({t:'h', v:el.querySelector('input').value});
+      } else {
+        var ins=el.querySelectorAll('input');
+        rows.push({t:'r', a:ins[0].value, b:ins[1].value});
+      }
+    }
+  );
   localStorage.setItem('notes_text', document.getElementById('notes-text').value);
   localStorage.setItem('notes_rows', JSON.stringify(rows));
+}
+
+var notesDragSrc=null;
+function notesMakeDraggable(div){
+  div.setAttribute('draggable','true');
+  div.addEventListener('dragstart',function(e){
+    notesDragSrc=div;
+    e.dataTransfer.effectAllowed='move';
+    setTimeout(function(){div.style.opacity='0.4';},0);
+  });
+  div.addEventListener('dragend',function(){
+    div.style.opacity='';
+    document.querySelectorAll('#notes-rows > div').forEach(function(el){
+      el.classList.remove('drag-over');
+    });
+  });
+  div.addEventListener('dragover',function(e){
+    e.preventDefault(); e.dataTransfer.dropEffect='move';
+    if(div!==notesDragSrc) div.classList.add('drag-over');
+  });
+  div.addEventListener('dragleave',function(){ div.classList.remove('drag-over'); });
+  div.addEventListener('drop',function(e){
+    e.preventDefault();
+    div.classList.remove('drag-over');
+    if(notesDragSrc&&notesDragSrc!==div){
+      var container=document.getElementById('notes-rows');
+      var kids=Array.prototype.slice.call(container.children);
+      var srcI=kids.indexOf(notesDragSrc), tgtI=kids.indexOf(div);
+      if(srcI<tgtI) container.insertBefore(notesDragSrc, div.nextSibling);
+      else container.insertBefore(notesDragSrc, div);
+      notesSave();
+    }
+  });
 }
 
 function notesAddRow(a, b){
   var div=document.createElement('div');
   div.className='notes-row';
+  var handle=document.createElement('span');
+  handle.className='notes-drag'; handle.textContent='⠿';
   var i1=document.createElement('input');
   i1.type='text'; i1.placeholder='Ackord / Begrepp'; i1.value=a||'';
   var i2=document.createElement('input');
@@ -1415,7 +1470,24 @@ function notesAddRow(a, b){
   del.className='notes-del'; del.textContent='×';
   del.onclick=function(){ div.parentNode.removeChild(div); notesSave(); };
   i1.oninput=i2.oninput=notesSave;
-  div.appendChild(i1); div.appendChild(i2); div.appendChild(del);
+  div.appendChild(handle); div.appendChild(i1); div.appendChild(i2); div.appendChild(del);
+  notesMakeDraggable(div);
+  document.getElementById('notes-rows').appendChild(div);
+}
+
+function notesAddHeading(v){
+  var div=document.createElement('div');
+  div.className='notes-heading';
+  var handle=document.createElement('span');
+  handle.className='notes-drag'; handle.textContent='⠿';
+  var inp=document.createElement('input');
+  inp.type='text'; inp.placeholder='Rubrik…'; inp.value=v||'';
+  var del=document.createElement('button');
+  del.className='notes-del'; del.textContent='×';
+  del.onclick=function(){ div.parentNode.removeChild(div); notesSave(); };
+  inp.oninput=notesSave;
+  div.appendChild(handle); div.appendChild(inp); div.appendChild(del);
+  notesMakeDraggable(div);
   document.getElementById('notes-rows').appendChild(div);
 }
 
@@ -1423,9 +1495,12 @@ function notesAddRow(a, b){
   var savedText=localStorage.getItem('notes_text')||'';
   document.getElementById('notes-text').value=savedText;
   document.getElementById('notes-text').oninput=notesSave;
-  var savedRows=JSON.parse(localStorage.getItem('notes_rows')||'[]');
-  if(savedRows.length===0) savedRows=[['','']];
-  savedRows.forEach(function(r){ notesAddRow(r[0], r[1]); });
+  var saved=JSON.parse(localStorage.getItem('notes_rows')||'[]');
+  if(!saved.length) saved=[{t:'r',a:'',b:''}];
+  saved.forEach(function(r){
+    if(r.t==='h') notesAddHeading(r.v);
+    else notesAddRow(r.a, r.b);
+  });
 })();
 
 // ── Init ───────────────────────────────────────────────────────
