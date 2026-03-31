@@ -902,11 +902,11 @@ function glDraw(frets){
     svg.appendChild(L(sx[0],fy,sx[5],fy,isNut?'rgba(255,255,255,0.5)':'rgba(255,255,255,0.15)',isNut?3.5:1));
   }
 
-  // Fret label if no nut
+  // Fret label if no nut — drawn above the fret grid so barre doesn't cover it
   if(!hasNut){
-    var lt=mk('text');lt.setAttribute('x',W-1);lt.setAttribute('y',topY+fh*0.5);
-    lt.setAttribute('text-anchor','end');lt.setAttribute('dominant-baseline','central');
-    lt.setAttribute('font-size','8');lt.setAttribute('fill','rgba(255,255,255,0.25)');
+    var lt=mk('text');lt.setAttribute('x',W-2);lt.setAttribute('y',topY-5);
+    lt.setAttribute('text-anchor','end');lt.setAttribute('dominant-baseline','auto');
+    lt.setAttribute('font-size','8');lt.setAttribute('fill','rgba(255,255,255,0.45)');
     lt.textContent=sf+'fr';svg.appendChild(lt);
   }
 
@@ -1139,7 +1139,6 @@ function buildElectricExtras(){
   var pg=clearG('p-extra');
   if(isEl){
     pSvg.setAttribute('viewBox','0 0 998 215');
-    pSvg.style.width='998px'; pSvg.style.maxWidth='none';
     strY.forEach(function(y,i){pg.appendChild(mkLine(670,y,992,y,'rgba(255,255,255,'+strOp[i]+')',strSW[i]));});
     for(var f=14;f<=21;f++){
       var fx=60+f*44;
@@ -1150,7 +1149,6 @@ function buildElectricExtras(){
     [70,134].forEach(function(cy){pg.appendChild(mkDot(bxP(21),cy,4));});
   } else {
     pSvg.setAttribute('viewBox','0 0 680 215');
-    pSvg.style.width=''; pSvg.style.maxWidth='';
   }
 
   // ── MODAL (spacing=48, nut x=60, strings end at 650) ──
@@ -1158,7 +1156,6 @@ function buildElectricExtras(){
   var mg=clearG('m-extra');
   if(isEl){
     mSvg.setAttribute('viewBox','0 0 1080 220');
-    mSvg.style.width='1080px'; mSvg.style.maxWidth='none';
     strY.forEach(function(y,i){mg.appendChild(mkLine(650,y,1074,y,'rgba(255,255,255,'+strOp[i]+')',strSW[i]));});
     for(var f=13;f<=21;f++){
       var fx=60+f*48;
@@ -1169,7 +1166,6 @@ function buildElectricExtras(){
     [70,134].forEach(function(cy){mg.appendChild(mkDot(bxM(21),cy,4));});
   } else {
     mSvg.setAttribute('viewBox','0 0 660 220');
-    mSvg.style.width=''; mSvg.style.maxWidth='';
   }
 
   // ── HALS (spacing=50, nut x=55, strings end at 660) ──
@@ -1177,7 +1173,6 @@ function buildElectricExtras(){
   var hg=clearG('h-extra');
   if(isEl){
     hSvg.setAttribute('viewBox','0 0 1116 220');
-    hSvg.style.width='1116px'; hSvg.style.maxWidth='none';
     strY.forEach(function(y,i){hg.appendChild(mkLine(660,y,1110,y,'rgba(255,255,255,'+strOp[i]+')',strSW[i]));});
     for(var f=13;f<=21;f++){
       var fx=55+f*50;
@@ -1188,7 +1183,6 @@ function buildElectricExtras(){
     [70,134].forEach(function(cy){hg.appendChild(mkDot(55+(20.5)*50,cy,4));});
   } else {
     hSvg.setAttribute('viewBox','0 0 670 220');
-    hSvg.style.width=''; hSvg.style.maxWidth='';
   }
 }
 
