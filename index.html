@@ -176,6 +176,35 @@ select:hover { border-color: var(--muted); }
 #login-overlay button:hover { background: rgba(240,168,48,0.15); }
 #login-error { font-size: 12px; color: #c0392b; min-height: 16px; }
 .ld { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 4px; vertical-align: middle; }
+
+/* Anteckningar */
+#notes-text {
+  width: 100%; min-height: 100px; max-height: 300px;
+  background: var(--bg2); color: var(--text2); border: 1px solid var(--border2);
+  border-radius: 8px; padding: 10px 12px; font-size: 13px; font-family: inherit;
+  resize: vertical; outline: none; transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+#notes-text:focus { border-color: var(--muted); }
+.notes-table-header { display: flex; gap: 8px; margin-bottom: 4px; padding: 0 2px; }
+.notes-col-hd { flex: 1; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted2); }
+.notes-row { display: flex; gap: 8px; margin-bottom: 6px; align-items: center; }
+.notes-row input {
+  flex: 1; background: var(--bg2); color: var(--text2); border: 1px solid var(--border);
+  border-radius: 6px; padding: 6px 10px; font-size: 13px; font-family: inherit; outline: none;
+  transition: border-color 0.15s;
+}
+.notes-row input:focus { border-color: var(--muted); }
+.notes-del { width: 28px; height: 28px; border-radius: 6px; border: 1px solid transparent;
+  background: transparent; color: var(--muted); font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
+.notes-del:hover { background: rgba(200,60,60,0.12); border-color: rgba(200,60,60,0.35); color: #c43c3c; }
+.notes-add-btn {
+  margin-top: 10px; padding: 6px 16px; border-radius: 20px;
+  border: 1px dashed var(--border2); background: transparent; color: var(--muted);
+  font-size: 12px; cursor: pointer; transition: all 0.15s;
+}
+.notes-add-btn:hover { border-color: var(--muted); color: var(--text3); }
 </style>
 </head>
 <body>
@@ -196,6 +225,7 @@ select:hover { border-color: var(--muted); }
   <button class="tab" id="tab-ackord" onclick="switchTab('ackord')">Ackordföljder</button>
   <button class="tab" id="tab-grepp" onclick="switchTab('grepp')">Ackordgrepp</button>
   <button class="tab" id="tab-cof" onclick="switchTab('cof')">Kvintcirkel</button>
+  <button class="tab" id="tab-notes" onclick="switchTab('notes')">Anteckningar</button>
   <button class="btn" id="inst-btn" onclick="toggleInstrument()" style="margin-left:auto;font-size:11px;padding:4px 10px;margin-bottom:1px">Akustisk</button>
   <button class="btn" id="theme-btn" onclick="toggleTheme()" style="font-size:11px;padding:4px 10px;margin-bottom:1px;margin-left:4px">☀ Ljust</button>
 </div>
@@ -467,6 +497,19 @@ select:hover { border-color: var(--muted); }
 <div id="panel-cof" style="display:none">
   <svg class="cof-svg" viewBox="0 0 320 320"><g id="cof-g"></g></svg>
   <div class="cof-info" id="cof-info"><p style="color:#333;font-size:12px;text-align:center;margin-top:6px">Tryck på en tonart</p></div>
+</div>
+<!-- ═══ ANTECKNINGAR ═══ -->
+<div id="panel-notes" style="display:none">
+  <textarea id="notes-text" placeholder="Skriv fritt här…"></textarea>
+  <div style="margin-top:24px">
+    <div class="notes-table-header">
+      <div class="notes-col-hd">Ackord / Begrepp</div>
+      <div class="notes-col-hd">Anteckning</div>
+      <div style="width:32px"></div>
+    </div>
+    <div id="notes-rows"></div>
+    <button class="notes-add-btn" onclick="notesAddRow()">+ Lägg till rad</button>
+  </div>
 </div>
 </div><!-- #app -->
 
@@ -1309,7 +1352,7 @@ function renderMood(){
 
 // ── Tabbar ─────────────────────────────────────────────────────
 function switchTab(t){
-  ['penta','modal','hals','ackord','grepp','cof'].forEach(function(id){
+  ['penta','modal','hals','ackord','grepp','cof','notes'].forEach(function(id){
     document.getElementById('panel-'+id).style.display=t===id?'':'none';
     document.getElementById('tab-'+id).className='tab'+(t===id?' active':'');
   });
@@ -1349,6 +1392,41 @@ function renderHals(){
 document.getElementById('h-key').addEventListener('change',function(){
   curHalsKey=parseInt(this.value); renderHals();
 });
+
+// ── Anteckningar ───────────────────────────────────────────────
+function notesSave(){
+  var rows=[];
+  document.querySelectorAll('.notes-row').forEach(function(r){
+    var ins=r.querySelectorAll('input');
+    rows.push([ins[0].value, ins[1].value]);
+  });
+  localStorage.setItem('notes_text', document.getElementById('notes-text').value);
+  localStorage.setItem('notes_rows', JSON.stringify(rows));
+}
+
+function notesAddRow(a, b){
+  var div=document.createElement('div');
+  div.className='notes-row';
+  var i1=document.createElement('input');
+  i1.type='text'; i1.placeholder='Ackord / Begrepp'; i1.value=a||'';
+  var i2=document.createElement('input');
+  i2.type='text'; i2.placeholder='Anteckning'; i2.value=b||'';
+  var del=document.createElement('button');
+  del.className='notes-del'; del.textContent='×';
+  del.onclick=function(){ div.parentNode.removeChild(div); notesSave(); };
+  i1.oninput=i2.oninput=notesSave;
+  div.appendChild(i1); div.appendChild(i2); div.appendChild(del);
+  document.getElementById('notes-rows').appendChild(div);
+}
+
+(function notesInit(){
+  var savedText=localStorage.getItem('notes_text')||'';
+  document.getElementById('notes-text').value=savedText;
+  document.getElementById('notes-text').oninput=notesSave;
+  var savedRows=JSON.parse(localStorage.getItem('notes_rows')||'[]');
+  if(savedRows.length===0) savedRows=[['','']];
+  savedRows.forEach(function(r){ notesAddRow(r[0], r[1]); });
+})();
 
 // ── Init ───────────────────────────────────────────────────────
 render(); selectG(1);
