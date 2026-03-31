@@ -150,8 +150,8 @@ select:hover { border-color: var(--muted); }
 #mformula { font-size: 12px; color: var(--muted); margin-bottom: 10px; letter-spacing: 0.4px; min-height: 16px; }
 
 /* Fretboard */
-.fretboard { display: block; width: 100%; max-width: 900px; }
-.fb-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.fretboard { display: block; width: 100%; }
+.fb-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; text-align: left; }
 
 /* Legend */
 .legend { display: flex; gap: 14px; margin-top: 8px; font-size: 12px; color: var(--muted); align-items: center; }
@@ -767,10 +767,11 @@ function renderAckord(){
       disp.appendChild(ch);
 
       var rootIdx=-1, chType='maj';
-      for(var ki=0;ki<keyNames.length;ki++){
-        if(cname.indexOf(keyNames[ki])===0){
-          rootIdx=ki;
-          var sfx=cname.slice(keyNames[ki].length);
+      var sortedKeys=keyNames.slice().sort(function(a,b){return b.length-a.length;});
+      for(var ki=0;ki<sortedKeys.length;ki++){
+        if(cname.indexOf(sortedKeys[ki])===0){
+          rootIdx=keyNames.indexOf(sortedKeys[ki]);
+          var sfx=cname.slice(sortedKeys[ki].length);
           chType='maj';
           for(var ti=0;ti<typeMap.length;ti++){
             if(sfx===typeMap[ti][0]){chType=typeMap[ti][1];break;}
@@ -815,7 +816,7 @@ var glTemplates={
   sus4: {lbl:'sus4', E:[0,2,2,2,0,0],    A:[-1,0,2,2,3,0]},
   dim:  {lbl:'dim',  E:null,             A:[-1,0,1,2,1,-1]},
   aug:  {lbl:'aug',  E:[0,3,2,1,1,0],    A:[-1,0,3,2,2,1]},
-  add9: {lbl:'add9', E:[0,2,2,1,0,2],    A:[-1,0,2,4,2,0]}
+  add9: {lbl:'add9', E:[0,2,2,1,0,2],    A:null}
 };
 // Hardcoded open voicings — key = "rootIndex_type"
 // rootIndex: A=0 Bb=1 B=2 C=3 C#=4 D=5 Eb=6 E=7 F=8 F#=9 G=10 G#=11
@@ -860,7 +861,8 @@ function glDraw(frets){
   var rs=rootSemitones[curGlRoot];
   var pressed=frets.filter(function(f){return f>0;});
   var minF=pressed.length?Math.min.apply(null,pressed):1;
-  var sf=minF<=3?1:minF; // start fret
+  var maxF=pressed.length?Math.max.apply(null,pressed):1;
+  var sf=(minF<=3&&maxF<=4)?1:minF; // show nut only when all notes fit within frets 1-4
   var hasNut=sf===1;
   // Barre: 2+ strings at startFret with span ≥ 2
   var atSF=[]; frets.forEach(function(f,i){if(f===sf)atSF.push(i);});
@@ -903,9 +905,9 @@ function glDraw(frets){
   if(hasBar){
     var by=topY+0.5*fh;
     var br=mk('rect');
-    br.setAttribute('x',sx[atSF[0]]-7);br.setAttribute('y',by-5);
+    br.setAttribute('x',sx[atSF[0]]-7);br.setAttribute('y',by-4);
     br.setAttribute('width',sx[atSF[atSF.length-1]]-sx[atSF[0]]+14);
-    br.setAttribute('height',10);br.setAttribute('rx',5);
+    br.setAttribute('height',8);br.setAttribute('rx',4);
     br.setAttribute('fill','rgba(190,190,190,0.88)');
     svg.appendChild(br);
   }
@@ -1261,10 +1263,11 @@ function renderMood(){
       ['m7b5','m7b5'],['maj7','maj7'],['add9','add9'],['sus2','sus2'],['sus4','sus4'],
       ['aug','aug'],['dim','dim'],['m11','m7'],['°7','dim'],['m7','m7'],['7','7'],['m','min'],['°','dim']
     ];
-    for(var ki=0;ki<keyNames.length;ki++){
-      if(moodName.indexOf(keyNames[ki])===0){
-        rootIdx=ki;
-        var sfx=moodName.slice(keyNames[ki].length);
+    var sortedKeys=keyNames.slice().sort(function(a,b){return b.length-a.length;});
+    for(var ki=0;ki<sortedKeys.length;ki++){
+      if(moodName.indexOf(sortedKeys[ki])===0){
+        rootIdx=keyNames.indexOf(sortedKeys[ki]);
+        var sfx=moodName.slice(sortedKeys[ki].length);
         chType='maj';
         for(var ti=0;ti<typeMap.length;ti++){
           if(sfx===typeMap[ti][0]){chType=typeMap[ti][1];break;}
@@ -1277,7 +1280,9 @@ function renderMood(){
     if(!vs.length) return;
     var wrap=document.createElement('div');
     wrap.className='gl-diagram';
+    var prevRoot=curGlRoot; curGlRoot=rootIdx;
     wrap.appendChild(glDraw(vs[0].frets));
+    curGlRoot=prevRoot;
     var lbl=document.createElement('div');
     lbl.className='gl-diagram-lbl';lbl.textContent=moodName;
     wrap.appendChild(lbl);
