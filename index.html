@@ -150,8 +150,8 @@ select:hover { border-color: var(--muted); }
 #mformula { font-size: 12px; color: var(--muted); margin-bottom: 10px; letter-spacing: 0.4px; min-height: 16px; }
 
 /* Fretboard */
-.fretboard { display: block; width: 100%; }
-.fb-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; text-align: left; }
+.fretboard { display: block; width: 100%; max-width: 900px; }
+.fb-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
 /* Legend */
 .legend { display: flex; gap: 14px; margin-top: 8px; font-size: 12px; color: var(--muted); align-items: center; }
@@ -836,18 +836,27 @@ var glOpen={
 
 var curGlRoot=0, curGlType='maj';
 
+function glMinFret(frets){
+  var p=frets.filter(function(f){return f>0;});
+  return p.length?Math.min.apply(null,p):999;
+}
 function glVoicings(rootIdx,type){
-  var rs=rootSemitones[rootIdx], tmpl=glTemplates[type], v=[];
+  var rs=rootSemitones[rootIdx], tmpl=glTemplates[type], ev=null, av=null;
   if(tmpl.E){
     var rf=(rs-4+12)%12;
-    v.push({frets:tmpl.E.map(function(o){return o===-1?-1:rf+o;}),rf:rf});
+    ev={frets:tmpl.E.map(function(o){return o===-1?-1:rf+o;}),rf:rf};
   }
   if(tmpl.A){
     var rf2=(rs-9+12)%12;
-    var f2=tmpl.A.map(function(o){return o===-1?-1:rf2+o;});
-    if(!v.some(function(x){return x.frets.join()===f2.join();}))
-      v.push({frets:f2,rf:rf2});
+    av={frets:tmpl.A.map(function(o){return o===-1?-1:rf2+o;}),rf:rf2};
   }
+  // Prefer whichever shape sits lower on the neck
+  var v=[];
+  if(ev&&av){
+    if(glMinFret(av.frets)<=glMinFret(ev.frets)){ v.push(av); v.push(ev); }
+    else { v.push(ev); v.push(av); }
+  } else if(ev){ v.push(ev); } else if(av){ v.push(av); }
+  // Open/special voicings always first
   var ok=rootIdx+'_'+type;
   if(glOpen[ok]){
     var of_=glOpen[ok];
