@@ -243,6 +243,7 @@ select:hover { border-color: var(--muted); }
   <button class="tab" id="tab-ackord" onclick="switchTab('ackord')">Ackordföljder</button>
   <button class="tab" id="tab-grepp" onclick="switchTab('grepp')">Ackordgrepp</button>
   <button class="tab" id="tab-cof" onclick="switchTab('cof')">Kvintcirkel</button>
+  <button class="tab" id="tab-analyze" onclick="switchTab('analyze')">Ackordanalys</button>
   <button class="btn" id="inst-btn" onclick="toggleInstrument()" style="margin-left:auto;font-size:11px;padding:4px 10px;margin-bottom:1px">Akustisk</button>
   <button class="btn" id="theme-btn" onclick="toggleTheme()" style="font-size:11px;padding:4px 10px;margin-bottom:1px;margin-left:4px">☀ Ljust</button>
 </div>
@@ -528,6 +529,28 @@ select:hover { border-color: var(--muted); }
     <div style="display:flex;gap:8px;margin-top:10px">
       <button class="notes-add-btn" onclick="notesAddRow()">+ Lägg till rad</button>
       <button class="notes-add-btn" onclick="notesAddHeading()">+ Rubrik</button>
+    </div>
+  </div>
+</div>
+<!-- ═══ ACKORDANALYS ═══ -->
+<div id="panel-analyze" style="display:none">
+  <div class="controls" style="margin-bottom:12px">
+    <button class="btn" onclick="bldShift(-1)">▲</button>
+    <span id="bld-pos" style="font-size:12px;color:var(--muted);padding:0 8px;min-width:52px;display:inline-block;text-align:center">Band 1</span>
+    <button class="btn" onclick="bldShift(1)">▼</button>
+    <span class="sep"></span>
+    <button class="btn" id="bld-barre-btn" onclick="bldToggleBarre()">+ Barré</button>
+    <span class="sep"></span>
+    <button class="btn" onclick="bldClear()">Rensa</button>
+  </div>
+  <div style="display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start">
+    <svg id="bld-svg" viewBox="0 0 268 305" style="width:268px;max-width:100%;flex-shrink:0;display:block"></svg>
+    <div style="flex:1;min-width:150px;padding-top:8px">
+      <div id="bld-name" style="font-size:44px;font-weight:800;color:var(--text);min-height:54px;line-height:1.05">—</div>
+      <div id="bld-desc" style="font-size:13px;color:var(--accent);margin:4px 0 16px;min-height:18px">Välj toner på halsen</div>
+      <div id="bld-notes-lbl" style="font-size:12px;color:var(--text3);margin-bottom:4px"></div>
+      <div id="bld-intervals" style="font-size:12px;color:var(--muted);margin-bottom:14px"></div>
+      <div id="bld-alts" style="font-size:12px;color:var(--muted2)"></div>
     </div>
   </div>
 </div>
@@ -1372,7 +1395,7 @@ function renderMood(){
 
 // ── Tabbar ─────────────────────────────────────────────────────
 function switchTab(t){
-  ['penta','modal','hals','ackord','grepp','cof','notes'].forEach(function(id){
+  ['penta','modal','hals','ackord','grepp','cof','notes','analyze'].forEach(function(id){
     document.getElementById('panel-'+id).style.display=t===id?'':'none';
     document.getElementById('tab-'+id).className='tab'+(t===id?' active':'');
   });
@@ -1513,6 +1536,267 @@ function notesAddHeading(v){
   });
 })();
 
+// ── Ackordanalys ───────────────────────────────────────────────
+var bld={frets:[-1,-1,-1,-1,-1,-1],sf:1,barre:0};
+var bldOpenSemi=[4,9,2,7,11,4]; // lowE,A,D,G,B,highE semitones
+
+var bldChords=[
+  {n:'',     ivs:[0,4,7],       sv:'dur'},
+  {n:'m',    ivs:[0,3,7],       sv:'moll'},
+  {n:'5',    ivs:[0,7],         sv:'powerackord'},
+  {n:'7',    ivs:[0,4,7,10],    sv:'dominant 7'},
+  {n:'maj7', ivs:[0,4,7,11],    sv:'stor 7'},
+  {n:'m7',   ivs:[0,3,7,10],    sv:'liten 7'},
+  {n:'m7b5', ivs:[0,3,6,10],    sv:'halvdiminuerat'},
+  {n:'dim',  ivs:[0,3,6],       sv:'diminuerat'},
+  {n:'dim7', ivs:[0,3,6,9],     sv:'dim 7'},
+  {n:'aug',  ivs:[0,4,8],       sv:'augmenterat'},
+  {n:'sus2', ivs:[0,2,7],       sv:'sus2'},
+  {n:'sus4', ivs:[0,5,7],       sv:'sus4'},
+  {n:'6',    ivs:[0,4,7,9],     sv:'sext'},
+  {n:'m6',   ivs:[0,3,7,9],     sv:'moll sext'},
+  {n:'add9', ivs:[0,2,4,7],     sv:'add9'},
+  {n:'9',    ivs:[0,2,4,7,10],  sv:'nona'},
+  {n:'maj9', ivs:[0,2,4,7,11],  sv:'stor nona'},
+  {n:'m9',   ivs:[0,2,3,7,10],  sv:'moll nona'},
+];
+
+var bldIvNames={0:'R',1:'b2',2:'2',3:'m3',4:'3',5:'4',6:'b5',7:'5',8:'#5',9:'6',10:'b7',11:'7'};
+
+function bldGetNotes(){
+  var out=[];
+  for(var s=0;s<6;s++){
+    if(bld.frets[s]<0) continue;
+    out.push({s:s,pc:(bldOpenSemi[s]+bld.frets[s])%12});
+  }
+  return out;
+}
+
+function bldIdentify(){
+  var sn=bldGetNotes();
+  var pcs=[];
+  sn.forEach(function(n){if(pcs.indexOf(n.pc)<0)pcs.push(n.pc);});
+  if(pcs.length<2) return [];
+  var results=[];
+  for(var root=0;root<12;root++){
+    var ivs=pcs.map(function(p){return(p-root+12)%12;}).sort(function(a,b){return a-b;});
+    bldChords.forEach(function(ct){
+      var exp=ct.ivs.slice().sort(function(a,b){return a-b;});
+      if(!exp.every(function(e){return ivs.indexOf(e)>=0;})) return;
+      var extra=ivs.filter(function(i){return exp.indexOf(i)<0;});
+      var exact=ivs.length===exp.length;
+      results.push({root:root,chord:ct,extra:extra,exact:exact,
+        score:(exact?100:50)-extra.length*20-ct.ivs.length});
+    });
+  }
+  results.sort(function(a,b){return b.score-a.score;});
+  var seen={};
+  return results.filter(function(r){
+    var k=r.root+'_'+r.chord.n;
+    if(seen[k]) return false;
+    seen[k]=true;
+    return true;
+  });
+}
+
+function bldShowResult(results){
+  var nameEl=document.getElementById('bld-name');
+  var descEl=document.getElementById('bld-desc');
+  var notesEl=document.getElementById('bld-notes-lbl');
+  var ivlEl=document.getElementById('bld-intervals');
+  var altsEl=document.getElementById('bld-alts');
+  var pcs=[];
+  bldGetNotes().forEach(function(n){if(pcs.indexOf(n.pc)<0)pcs.push(n.pc);});
+  notesEl.textContent=pcs.length?'Toner: '+pcs.map(function(p){return chromatic[p];}).join(' · '):'';
+  if(!results.length||pcs.length<2){
+    nameEl.textContent='—';
+    descEl.textContent=pcs.length?'Okänt ackord':'Välj toner på halsen';
+    ivlEl.textContent=''; altsEl.textContent='';
+    return;
+  }
+  var best=results[0];
+  var rn=chromatic[best.root];
+  nameEl.textContent=rn+best.chord.n;
+  descEl.textContent=rn+' '+best.chord.sv;
+  ivlEl.textContent='Intervall: '+pcs.map(function(p){
+    return bldIvNames[(p-best.root+12)%12]||'?';
+  }).join(' · ');
+  var alts=results.slice(1,4).map(function(r){return chromatic[r.root]+r.chord.n;});
+  altsEl.textContent=alts.length?'Kan också vara: '+alts.join(', '):'';
+}
+
+function bldRender(){
+  var svg=document.getElementById('bld-svg');
+  while(svg.firstChild)svg.removeChild(svg.firstChild);
+  var mkE=function(t){return document.createElementNS(ns,t);};
+  var sx=[32,74,116,158,200,242];
+  var fy=[62,106,150,194,238,282];
+  var numRows=5,rowH=44;
+  var strLabels=['E','A','D','G','B','e'];
+  var results=bldIdentify();
+  var rootPc=results.length?results[0].root:-1;
+
+  // String lines
+  for(var s=0;s<6;s++){
+    var sl=mkE('line');
+    sl.setAttribute('x1',sx[s]);sl.setAttribute('y1',fy[0]);
+    sl.setAttribute('x2',sx[s]);sl.setAttribute('y2',fy[numRows]);
+    sl.setAttribute('stroke','rgba(255,255,255,0.28)');sl.setAttribute('stroke-width','1');
+    svg.appendChild(sl);
+  }
+
+  // Fret lines + nut
+  for(var fi=0;fi<=numRows;fi++){
+    var isNut=fi===0&&bld.sf===1;
+    var fl=mkE('line');
+    fl.setAttribute('x1',sx[0]-8);fl.setAttribute('y1',fy[fi]);
+    fl.setAttribute('x2',sx[5]+8);fl.setAttribute('y2',fy[fi]);
+    fl.setAttribute('stroke',isNut?'rgba(255,255,255,0.75)':'rgba(255,255,255,0.18)');
+    fl.setAttribute('stroke-width',isNut?'5':'1');
+    svg.appendChild(fl);
+  }
+
+  // Position fret label (when not at nut)
+  if(bld.sf>1){
+    var pt=mkE('text');
+    pt.setAttribute('x',2);pt.setAttribute('y',fy[0]+rowH/2);
+    pt.setAttribute('font-size','9');pt.setAttribute('fill','rgba(255,255,255,0.45)');
+    pt.setAttribute('dominant-baseline','central');
+    pt.textContent=bld.sf+'fr';
+    svg.appendChild(pt);
+  }
+
+  // Position marker dots (frets 3,5,7,9,12,15,17)
+  [3,5,7,9,12,15,17,19].forEach(function(df){
+    var row=df-bld.sf;
+    if(row<0||row>=numRows) return;
+    var cy=fy[row]+rowH/2, midX=(sx[2]+sx[3])/2;
+    if(df===12||df===24){
+      [sx[1],sx[4]].forEach(function(cx){
+        var d=mkE('circle');d.setAttribute('cx',cx);d.setAttribute('cy',cy);
+        d.setAttribute('r','3');d.setAttribute('fill','rgba(255,255,255,0.08)');svg.appendChild(d);
+      });
+    } else {
+      var d=mkE('circle');d.setAttribute('cx',midX);d.setAttribute('cy',cy);
+      d.setAttribute('r','3');d.setAttribute('fill','rgba(255,255,255,0.08)');svg.appendChild(d);
+    }
+  });
+
+  // String labels at top
+  for(var s=0;s<6;s++){
+    var lt=mkE('text');
+    lt.setAttribute('x',sx[s]);lt.setAttribute('y',18);
+    lt.setAttribute('text-anchor','middle');lt.setAttribute('dominant-baseline','central');
+    lt.setAttribute('font-size','10');lt.setAttribute('fill','rgba(255,255,255,0.3)');
+    lt.textContent=strLabels[s];
+    svg.appendChild(lt);
+  }
+
+  // Header X/O indicators + click areas
+  for(var s=0;s<6;s++){
+    var f=bld.frets[s];
+    if(f===-1){
+      var xt=mkE('text');
+      xt.setAttribute('x',sx[s]);xt.setAttribute('y',41);
+      xt.setAttribute('text-anchor','middle');xt.setAttribute('dominant-baseline','central');
+      xt.setAttribute('font-size','15');xt.setAttribute('fill','rgba(255,255,255,0.38)');
+      xt.textContent='×';svg.appendChild(xt);
+    } else if(f===0){
+      var oc=mkE('circle');
+      oc.setAttribute('cx',sx[s]);oc.setAttribute('cy',41);oc.setAttribute('r','8');
+      oc.setAttribute('fill','none');oc.setAttribute('stroke','rgba(255,255,255,0.5)');
+      oc.setAttribute('stroke-width','1.5');svg.appendChild(oc);
+    }
+    (function(str){
+      var ha=mkE('rect');
+      ha.setAttribute('x',sx[str]-19);ha.setAttribute('y',28);
+      ha.setAttribute('width','38');ha.setAttribute('height','28');
+      ha.setAttribute('fill','transparent');ha.style.cursor='pointer';
+      ha.addEventListener('click',function(){bldClickHeader(str);});
+      svg.appendChild(ha);
+    })(s);
+  }
+
+  // Barre bar
+  if(bld.barre>=bld.sf&&bld.barre<bld.sf+numRows){
+    var br=bld.barre-bld.sf;
+    var by=fy[br]+rowH/2;
+    var barEl=mkE('rect');
+    barEl.setAttribute('x',sx[0]-9);barEl.setAttribute('y',by-7);
+    barEl.setAttribute('width',sx[5]-sx[0]+18);barEl.setAttribute('height',14);
+    barEl.setAttribute('rx',7);barEl.setAttribute('fill','rgba(185,185,185,0.88)');
+    svg.appendChild(barEl);
+  }
+
+  // Finger dots
+  for(var s=0;s<6;s++){
+    var f=bld.frets[s];
+    if(f<=0) continue;
+    var row=f-bld.sf;
+    if(row<0||row>=numRows) continue;
+    if(bld.barre===f) continue;
+    var cy=fy[row]+rowH/2;
+    var notePc=(bldOpenSemi[s]+f)%12;
+    var isRoot=notePc===rootPc;
+    var dc=mkE('circle');
+    dc.setAttribute('cx',sx[s]);dc.setAttribute('cy',cy);dc.setAttribute('r','14');
+    dc.setAttribute('fill',isRoot?'#f0a830':'rgba(205,205,205,0.92)');
+    svg.appendChild(dc);
+  }
+
+  // Clickable cells
+  for(var s=0;s<6;s++){
+    for(var r=0;r<numRows;r++){
+      (function(str,row){
+        var fretNum=bld.sf+row;
+        var ca=mkE('rect');
+        ca.setAttribute('x',sx[str]-19);ca.setAttribute('y',fy[row]+2);
+        ca.setAttribute('width','38');ca.setAttribute('height',rowH-4);
+        ca.setAttribute('fill','transparent');ca.style.cursor='pointer';
+        ca.addEventListener('click',function(){bldClickCell(str,fretNum);});
+        svg.appendChild(ca);
+      })(s,r);
+    }
+  }
+
+  document.getElementById('bld-pos').textContent='Band '+bld.sf;
+  var bBtn=document.getElementById('bld-barre-btn');
+  bBtn.textContent=bld.barre?'Ta bort barré (band '+bld.barre+')':'+ Barré';
+  bBtn.className='btn'+(bld.barre?' active':'');
+  bldShowResult(results);
+}
+
+function bldClickHeader(s){
+  bld.frets[s]=bld.frets[s]===-1?0:-1;
+  bldRender();
+}
+
+function bldClickCell(s,fret){
+  bld.frets[s]=bld.frets[s]===fret?-1:fret;
+  bldRender();
+}
+
+function bldShift(dir){
+  bld.sf=Math.max(1,Math.min(bld.sf+dir,17));
+  bldRender();
+}
+
+function bldClear(){
+  bld.frets=[-1,-1,-1,-1,-1,-1];
+  bld.barre=0;
+  bldRender();
+}
+
+function bldToggleBarre(){
+  if(bld.barre){
+    bld.barre=0;
+  } else {
+    bld.barre=bld.sf;
+    for(var s=0;s<6;s++){if(bld.frets[s]===-1)bld.frets[s]=bld.sf;}
+  }
+  bldRender();
+}
+
 // ── Init ───────────────────────────────────────────────────────
 render(); selectG(1);
 renderModal();
@@ -1522,6 +1806,7 @@ renderMood();
 buildElectricExtras();
 renderGrepp();
 renderCof();
+bldRender();
 
 // ── PWA service worker ─────────────────────────────────────────
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
