@@ -61,10 +61,11 @@ body.light {
   background: var(--bg); color: var(--text);
 }
 
-/* Ljust tema — fretboards & ackordgrepp behåller mörkt utseende */
-body.light .fb-wrap { background: #1c1c1c; border-radius: 8px; padding: 10px; margin: 0 -10px 8px; }
-body.light .gl-diagram { background: #1e1e1e; border-radius: 8px; padding: 6px 4px 2px; }
-body.light .gl-diagram-lbl { color: #888; }
+/* Ljust tema — fretboards: statiska SVG-element använder CSS för att åsidosätta SVG-attribut */
+body.light .fb-wrap svg.fretboard > line { stroke: rgba(0,0,0,0.14); }
+body.light .fb-wrap svg.fretboard > line[stroke-width="3.5"] { stroke: rgba(0,0,0,0.55); }
+body.light .fb-wrap svg.fretboard > circle { fill: rgba(0,0,0,0.06); }
+body.light .fb-wrap svg.fretboard > text { fill: rgba(0,0,0,0.28); }
 
 /* Ljust tema — tydligare separationer */
 body.light .tab-bar { background: #f9f9f9; border-color: #d0d0d0; }
@@ -959,14 +960,23 @@ function glDraw(frets){
   var pressed=frets.filter(function(f){return f>0;});
   var minF=pressed.length?Math.min.apply(null,pressed):1;
   var maxF=pressed.length?Math.max.apply(null,pressed):1;
-  var sf=(minF<=3&&maxF<=4)?1:minF; // show nut only when all notes fit within frets 1-4
+  var sf=(minF<=3&&maxF<=4)?1:minF;
   var hasNut=sf===1;
-  // Barre: 2+ strings at startFret with span ≥ 2
   var atSF=[]; frets.forEach(function(f,i){if(f===sf)atSF.push(i);});
   var hasBar=atSF.length>=2&&(atSF[atSF.length-1]-atSF[0])>=2;
 
+  var glLt=document.body.classList.contains('light');
+  var glStrClr=glLt?'rgba(0,0,0,0.22)':'rgba(255,255,255,0.22)';
+  var glFretClr=glLt?'rgba(0,0,0,0.14)':'rgba(255,255,255,0.15)';
+  var glNutClr=glLt?'rgba(0,0,0,0.55)':'rgba(255,255,255,0.5)';
+  var glLblClr=glLt?'rgba(0,0,0,0.4)':'rgba(255,255,255,0.45)';
+  var glMuteClr=glLt?'rgba(0,0,0,0.45)':'#444';
+  var glOpenClr=glLt?'rgba(0,0,0,0.4)':'rgba(255,255,255,0.35)';
+  var glFingerClr=glLt?'rgba(55,55,55,0.85)':'rgba(195,195,195,0.88)';
+  var glBarreClr=glLt?'rgba(60,60,60,0.82)':'rgba(190,190,190,0.88)';
+
   var W=112,H=128;
-  var sx=[10,28,46,64,82,100]; // string x positions (18px spacing)
+  var sx=[10,28,46,64,82,100];
   var topY=hasNut?26:21, fh=20;
 
   var svg=document.createElementNS(ns,'svg');
@@ -980,36 +990,31 @@ function glDraw(frets){
     return l;
   }
 
-  // String lines
   for(var s=0;s<6;s++)
-    svg.appendChild(L(sx[s],14,sx[s],topY+4*fh,'rgba(255,255,255,0.22)',1));
+    svg.appendChild(L(sx[s],14,sx[s],topY+4*fh,glStrClr,1));
 
-  // Fret lines
   for(var f=0;f<=4;f++){
     var fy=topY+f*fh, isNut=(f===0&&hasNut);
-    svg.appendChild(L(sx[0],fy,sx[5],fy,isNut?'rgba(255,255,255,0.5)':'rgba(255,255,255,0.15)',isNut?3.5:1));
+    svg.appendChild(L(sx[0],fy,sx[5],fy,isNut?glNutClr:glFretClr,isNut?3.5:1));
   }
 
-  // Fret label if no nut — drawn above the fret grid so barre doesn't cover it
   if(!hasNut){
     var lt=mk('text');lt.setAttribute('x',W-2);lt.setAttribute('y',topY-5);
     lt.setAttribute('text-anchor','end');lt.setAttribute('dominant-baseline','auto');
-    lt.setAttribute('font-size','8');lt.setAttribute('fill','rgba(255,255,255,0.45)');
+    lt.setAttribute('font-size','8');lt.setAttribute('fill',glLblClr);
     lt.textContent=sf+'fr';svg.appendChild(lt);
   }
 
-  // Barre bar
   if(hasBar){
     var by=topY+0.5*fh;
     var br=mk('rect');
     br.setAttribute('x',sx[atSF[0]]-7);br.setAttribute('y',by-4);
     br.setAttribute('width',sx[atSF[atSF.length-1]]-sx[atSF[0]]+14);
     br.setAttribute('height',8);br.setAttribute('rx',4);
-    br.setAttribute('fill','rgba(190,190,190,0.88)');
+    br.setAttribute('fill',glBarreClr);
     svg.appendChild(br);
   }
 
-  // Dots and indicators
   frets.forEach(function(f,si){
     var x=sx[si];
     var isRoot=f>=0&&(glOpenSemi[si]+f)%12===rs;
@@ -1017,13 +1022,13 @@ function glDraw(frets){
       var xt=mk('text');
       xt.setAttribute('x',x);xt.setAttribute('y',9);
       xt.setAttribute('text-anchor','middle');xt.setAttribute('dominant-baseline','central');
-      xt.setAttribute('font-size','12');xt.setAttribute('fill','#444');
+      xt.setAttribute('font-size','12');xt.setAttribute('fill',glMuteClr);
       xt.textContent='×';svg.appendChild(xt);
     } else if(f===0){
       var oc=mk('circle');
       oc.setAttribute('cx',x);oc.setAttribute('cy',9);oc.setAttribute('r',5.5);
       oc.setAttribute('fill',isRoot?'#f0a830':'none');
-      oc.setAttribute('stroke',isRoot?'#f0a830':'rgba(255,255,255,0.35)');
+      oc.setAttribute('stroke',isRoot?'#f0a830':glOpenClr);
       oc.setAttribute('stroke-width','1.5');svg.appendChild(oc);
     } else {
       if(f<sf||f>sf+3) return;
@@ -1031,7 +1036,7 @@ function glDraw(frets){
       var cy=topY+(f-sf+0.5)*fh;
       var dc=mk('circle');
       dc.setAttribute('cx',x);dc.setAttribute('cy',cy);dc.setAttribute('r',8);
-      dc.setAttribute('fill',isRoot?'#f0a830':'rgba(195,195,195,0.88)');
+      dc.setAttribute('fill',isRoot?'#f0a830':glFingerClr);
       svg.appendChild(dc);
     }
   });
@@ -1191,6 +1196,11 @@ function toggleTheme(){
   localStorage.setItem('guitarTheme',isLight?'light':'dark');
   renderCof();
   bldRender();
+  renderHals();
+  buildElectricExtras();
+  render(); selectG(curGrepp);
+  renderModal();
+  renderGrepp();
 }
 (function(){
   if(localStorage.getItem('guitarTheme')==='light'){
@@ -1207,10 +1217,17 @@ function maxFretsNeck(){ return curInstrument==='electric'?21:12; }
 
 function buildElectricExtras(){
   var isEl=curInstrument==='electric';
+  var eLt=document.body.classList.contains('light');
   var mk=function(t){return document.createElementNS(ns,t);};
   var strY=[22,54,86,118,150,178];
   var strSW=[0.8,1.1,1.4,1.8,2.1,2.4];
-  var strOp=['0.25','0.28','0.32','0.36','0.40','0.45'];
+  var strOp=eLt
+    ?['0.20','0.23','0.27','0.30','0.34','0.38']
+    :['0.25','0.28','0.32','0.36','0.40','0.45'];
+  var eFretClr=eLt?'rgba(0,0,0,0.14)':'rgba(255,255,255,0.12)';
+  var eFretNumClr=eLt?'rgba(0,0,0,0.28)':'rgba(255,255,255,0.2)';
+  var eDotClr=eLt?'rgba(0,0,0,0.06)':'rgba(255,255,255,0.07)';
+  var eStrBase=eLt?'rgba(0,0,0,':'rgba(255,255,255,';
   function mkLine(x1,y1,x2,y2,stroke,sw){
     var l=mk('line');
     l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);
@@ -1223,7 +1240,7 @@ function buildElectricExtras(){
   }
   function mkDot(cx,cy,r){
     var c=mk('circle');c.setAttribute('cx',cx);c.setAttribute('cy',cy);
-    c.setAttribute('r',r);c.setAttribute('fill','rgba(255,255,255,0.07)');return c;
+    c.setAttribute('r',r);c.setAttribute('fill',eDotClr);return c;
   }
   function clearG(id){var g=document.getElementById(id);while(g.firstChild)g.removeChild(g.firstChild);return g;}
 
@@ -1241,11 +1258,11 @@ function buildElectricExtras(){
   if(isEl){
     pSvg.setAttribute('viewBox','0 0 998 215');
     pSvg.style.width=elW(pSvg,680,998)+'px'; pSvg.style.maxWidth='none';
-    strY.forEach(function(y,i){pg.appendChild(mkLine(670,y,992,y,'rgba(255,255,255,'+strOp[i]+')',strSW[i]));});
+    strY.forEach(function(y,i){pg.appendChild(mkLine(670,y,992,y,eStrBase+strOp[i]+')',strSW[i]));});
     for(var f=14;f<=21;f++){
       var fx=60+f*44;
-      pg.appendChild(mkLine(fx,12,fx,190,'rgba(255,255,255,0.12)',1));
-      pg.appendChild(mkTxt(60+(f-0.5)*44,205,10,'rgba(255,255,255,0.2)',f));
+      pg.appendChild(mkLine(fx,12,fx,190,eFretClr,1));
+      pg.appendChild(mkTxt(60+(f-0.5)*44,205,10,eFretNumClr,f));
     }
     [15,17,19].forEach(function(f){pg.appendChild(mkDot(bxP(f),102,4));});
     [70,134].forEach(function(cy){pg.appendChild(mkDot(bxP(21),cy,4));});
@@ -1260,11 +1277,11 @@ function buildElectricExtras(){
   if(isEl){
     mSvg.setAttribute('viewBox','0 0 1080 220');
     mSvg.style.width=elW(mSvg,660,1080)+'px'; mSvg.style.maxWidth='none';
-    strY.forEach(function(y,i){mg.appendChild(mkLine(650,y,1074,y,'rgba(255,255,255,'+strOp[i]+')',strSW[i]));});
+    strY.forEach(function(y,i){mg.appendChild(mkLine(650,y,1074,y,eStrBase+strOp[i]+')',strSW[i]));});
     for(var f=13;f<=21;f++){
       var fx=60+f*48;
-      mg.appendChild(mkLine(fx,12,fx,190,'rgba(255,255,255,0.12)',1));
-      mg.appendChild(mkTxt(60+(f-0.5)*48,210,10,'rgba(255,255,255,0.2)',f));
+      mg.appendChild(mkLine(fx,12,fx,190,eFretClr,1));
+      mg.appendChild(mkTxt(60+(f-0.5)*48,210,10,eFretNumClr,f));
     }
     [15,17,19].forEach(function(f){mg.appendChild(mkDot(bxM(f),102,4));});
     [70,134].forEach(function(cy){mg.appendChild(mkDot(bxM(21),cy,4));});
@@ -1279,11 +1296,11 @@ function buildElectricExtras(){
   if(isEl){
     hSvg.setAttribute('viewBox','0 0 1116 220');
     hSvg.style.width=elW(hSvg,670,1116)+'px'; hSvg.style.maxWidth='none';
-    strY.forEach(function(y,i){hg.appendChild(mkLine(660,y,1110,y,'rgba(255,255,255,'+strOp[i]+')',strSW[i]));});
+    strY.forEach(function(y,i){hg.appendChild(mkLine(660,y,1110,y,eStrBase+strOp[i]+')',strSW[i]));});
     for(var f=13;f<=21;f++){
       var fx=55+f*50;
-      hg.appendChild(mkLine(fx,12,fx,192,'rgba(255,255,255,0.12)',1));
-      hg.appendChild(mkTxt(55+(f-0.5)*50,210,9,'rgba(255,255,255,0.2)',f));
+      hg.appendChild(mkLine(fx,12,fx,192,eFretClr,1));
+      hg.appendChild(mkTxt(55+(f-0.5)*50,210,9,eFretNumClr,f));
     }
     [15,17,19].forEach(function(f){hg.appendChild(mkDot(55+(f-0.5)*50,102,4));});
     [70,134].forEach(function(cy){hg.appendChild(mkDot(55+(20.5)*50,cy,4));});
@@ -1415,6 +1432,7 @@ function renderHals(){
   var c=document.getElementById('hals-dots');
   while(c.firstChild)c.removeChild(c.firstChild);
   var root=rootSemitones[curHalsKey];
+  var hLt=document.body.classList.contains('light');
   for(var s=0;s<6;s++){
     for(var f=0;f<=maxFretsNeck();f++){
       var note=(openNotes[s]+f)%12;
@@ -1425,14 +1443,14 @@ function renderHals(){
       var g=document.createElementNS(ns,'g');
       var ci=document.createElementNS(ns,'circle');
       ci.setAttribute('cx',cx); ci.setAttribute('cy',cy); ci.setAttribute('r','10');
-      ci.setAttribute('fill',isRoot?'#f0a830':'#1e1e1e');
-      ci.setAttribute('stroke',isRoot?'none':'rgba(255,255,255,0.18)');
+      ci.setAttribute('fill',isRoot?'#f0a830':(hLt?'#e0e0e0':'#1e1e1e'));
+      ci.setAttribute('stroke',isRoot?'none':(hLt?'rgba(0,0,0,0.18)':'rgba(255,255,255,0.18)'));
       ci.setAttribute('stroke-width','1');
       var t=document.createElementNS(ns,'text');
       t.setAttribute('x',cx); t.setAttribute('y',cy);
       t.setAttribute('text-anchor','middle'); t.setAttribute('dominant-baseline','central');
       t.setAttribute('font-size',name.length>1?'7':'8'); t.setAttribute('font-weight','500');
-      t.setAttribute('fill',isRoot?'#2a1800':'#bbb');
+      t.setAttribute('fill',isRoot?'#2a1800':(hLt?'#333':'#bbb'));
       t.textContent=name;
       g.appendChild(ci); g.appendChild(t); c.appendChild(g);
     }
